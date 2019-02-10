@@ -1,2 +1,18 @@
 node_modules/
 config.json
+
+# Turds
+*~
+\#*\#
+.\#*\#
+/.vscode
+/.idea
+.tern-port
+
+# Package manager logs
+yarn-error.log
+npm-error.log
+
+# Not good to mix other lockfiles
+shrinkwrap.yml
+yarn.lock
