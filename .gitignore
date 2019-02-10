@@ -14,5 +14,5 @@ yarn-error.log
 npm-error.log
 
 # Not good to mix other lockfiles
-shrinkwrap.yml
+shrinkwrap.yaml
 yarn.lock
