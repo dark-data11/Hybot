@@ -4,7 +4,15 @@
         "bluebird": "^3.5.3",
         "cat-loggr": "^1.0.17",
         "eris": "^0.9.0",
-        "sequelize": "^4.42.0",
-        "sqlite3": "^4.0.6"
+        "eris-additions": "^1.2.5",
+        "mongodb": "^3.1.13"
+    },
+    "devDependencies": {
+        "cz-conventional-changelog": "^2.1.0"
+    },
+    "config": {
+        "commitizen": {
+            "path": "./node_modules/cz-conventional-changelog"
+        }
     }
 }

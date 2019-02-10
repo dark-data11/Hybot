@@ -1,18 +1,19 @@
-const Eris = require('eris'), CatLoggr = require('cat-loggr'), Sequelize = require('sequelize'), fs = require('fs'), Promise = require('bluebird'),
+const Eris = require('eris'), CatLoggr = require('cat-loggr'), MongoDB = require('mongodb'), fs = require('fs'), Promise = require('bluebird'),
     config = require('./config.json'), bot = new Eris(config.token), loggr = new CatLoggr();
 
-var commands = {}, models = {};
+require('eris-additions')(Eris); // as the name implies, it adds things to eris
+
+var commands = {};
 
 global.Promise = Promise;
 
 Promise.promisifyAll(fs);
+Promise.promisifyAll(MongoDB);
 
 loggr.setGlobal();
 
-const db = new Sequelize('hybot', null, null, {
-    dialect: 'sqlite',
-    storage: './hybot.sqlite'
-});
+var db;
+var conn;
 
 bot.on('ready', () => {
     console.info('Hello world!');
@@ -22,33 +23,16 @@ bot.on('ready', () => {
     for (let logoLine of config.logo)
         console.init(logoLine);
 
-    console.init('Testing SQLite connection...');
+    console.init('Connecting to MongoDB...');
 
     try {
-        await db.authenticate();
+        conn = await MongoDB.connectAsync('mongodb://' + config.mongodb.host + ':' + config.mongodb.port, { useNewUrlParser: true });
+        db = conn.db(config.mongodb.db);
         console.init('OK');
     } catch (e) {
         console.error(e);
+        return;
     }
-
-    console.init('Defining models and modifying tables if needed...');
-
-    let models = await fs.readdirAsync('./models');
-
-    for (let file of models) {
-        let model = require('./models/' + file);
-        let name = file.substring(0, file.length - 3);
-
-        models[name] = model(db);
-
-        console.init('Defined model \'' + name + '\'');
-    }
-
-    console.init('Synchronising...');
-
-    await db.sync();
-
-    console.init('OK');
 
     console.init('Loading commands...');
 
@@ -73,7 +57,27 @@ bot.on('ready', () => {
     bot.on('messageCreate', async msg => {
         if (msg.author.bot) return;
 
-        let guildInfo = (await models.guild.findOrCreate({ where: { guild_id: msg.channel.guild.id } }))[0]; // first element is actually the data
+        let guildData = db.collection('guild');
+        
+        let guildInfo = await guildData.findOne({ guildId: msg.channel.guild.id });
+
+        if (guildInfo === null) {
+            await guildData.insertOne(guildInfo = {
+                guildId: msg.channel.guild.id,
+                welcomer: {
+                    enabled: false,
+                    channel: null,
+                    message: 'Welcome, {user}, to {server}!'
+                },
+                farewell: {
+                    enabled: false,
+                    channel: null,
+                    message: 'Farewell, {user}.'
+                },
+                theme: config.theme,
+                prefix: config.prefix
+            });
+        }
 
         if (msg.content.startsWith(guildInfo.prefix)) {
             // developer's note: this is how to not break everything when someone sets a prefix with spaces in
