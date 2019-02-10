@@ -1,0 +1,10 @@
+{
+    "name": "hybot",
+    "dependencies": {
+        "bluebird": "^3.5.3",
+        "cat-loggr": "^1.0.17",
+        "eris": "^0.9.0",
+        "sequelize": "^4.42.0",
+        "sqlite3": "^4.0.6"
+    }
+}
