@@ -54,30 +54,26 @@ bot.on('ready', () => {
 
     bot.connect();
 
+    bot.on('guildMemberAdd', async (guild, member) => {
+        let guildInfo = await getGuildData(msg.channel.guild.id);
+
+        // welcomer
+        if (guildInfo.welcomer.enabled) {
+            let formattedString = guildInfo.welcomer.message.replace('{user}', member.username).replace('{server}', guild.name);
+            
+            try {
+                await guild.channels.find(chan => chan.id === guildInfo.welcomer.channel).createMessage(formattedString);
+            } catch(e) {
+                console.warn('Channel in guild using welcomer does not exist. Disabling.');
+                await db.collection('guild').updateOne(guildInfo, { $set: { welcomer: { enabled: false } } });
+            }
+        }
+    });
+
     bot.on('messageCreate', async msg => {
         if (msg.author.bot) return;
 
-        let guildData = db.collection('guild');
-        
-        let guildInfo = await guildData.findOne({ guildId: msg.channel.guild.id });
-
-        if (guildInfo === null) {
-            await guildData.insertOne(guildInfo = {
-                guildId: msg.channel.guild.id,
-                welcomer: {
-                    enabled: false,
-                    channel: null,
-                    message: 'Welcome, {user}, to {server}!'
-                },
-                farewell: {
-                    enabled: false,
-                    channel: null,
-                    message: 'Farewell, {user}.'
-                },
-                theme: config.theme,
-                prefix: config.prefix
-            });
-        }
+        let guildInfo = await getGuildData(msg.channel.guild.id);
 
         if (msg.content.startsWith(guildInfo.prefix)) {
             // developer's note: this is how to not break everything when someone sets a prefix with spaces in
@@ -103,3 +99,29 @@ bot.on('ready', () => {
         }
     });
 })();
+
+async function getGuildData(id) {
+    let guildData = db.collection('guild');
+
+    let guildInfo = await guildData.findOne({ guildId: msg.channel.guild.id });
+
+    if (guildInfo === null) {
+        await guildData.insertOne(guildInfo = {
+            guildId: id,
+            welcomer: {
+                enabled: false,
+                channel: null,
+                message: 'Welcome, {user}, to {server}!'
+            },
+            farewell: {
+                enabled: false,
+                channel: null,
+                message: 'Farewell, {user}.'
+            },
+            theme: config.theme,
+            prefix: config.prefix
+        });
+    }
+
+    return guildInfo;
+}
