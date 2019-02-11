@@ -1,3 +1,5 @@
 {
-	"precommit": "prettier *.js commands/*.js *.json --write && git add $(git diff --staged --name-only)"
+	"hooks": {
+		"pre-commit": "prettier *.js commands/*.js *.json --write && git add *"
+	}
 }
