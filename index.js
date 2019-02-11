@@ -45,7 +45,7 @@ bot.on('ready', () => {
 
         commands[name] = cmd;
 
-        console.init('Loaded command \'' + name + '\'');
+        console.info('Loaded command \'' + name + '\'');
     }
 
     console.init('OK');
