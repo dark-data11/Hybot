@@ -9,7 +9,8 @@ const Eris = require('eris'),
 
 require('eris-additions')(Eris); // as the name implies, it adds things to eris
 
-var commands = {};
+const commands = {};
+const hooks = {};
 
 global.Promise = Promise;
 
@@ -18,15 +19,15 @@ Promise.promisifyAll(MongoDB);
 
 loggr.setGlobal();
 
-var db;
-var conn;
+let db;
+let conn;
 
 bot.on('ready', () => {
 	console.info('Hello world!');
 });
 
 (async () => {
-	for (let logoLine of config.logo) console.init(logoLine);
+	for (const logoLine of config.logo) console.init(logoLine);
 
 	console.init('Connecting to MongoDB...');
 
@@ -44,12 +45,32 @@ bot.on('ready', () => {
 
 	console.init('Loading commands...');
 
-	let cmds = await fs.readdirAsync('./commands');
+	const cmds = (await fs.readdirAsync('./commands')).filter(
+		file =>
+			!file.startsWith('#') && !file.startsWith('.#') && file.endsWith('.js')
+	);
+	const hookContext = {bot, db, client: bot};
 
-	for (let file of cmds) {
-		let Command = require('./commands/' + file);
-		let name = file.substring(0, file.length - 3);
-		let cmd = new Command();
+	for (const file of cmds) {
+		const Command = require('./commands/' + file);
+		const name = file.substring(0, file.length - 3);
+		const cmd = new Command();
+		if (cmd.hooks) {
+			hooks[name] = {};
+			for (const hookName in cmd.hooks) {
+				// We need to give them a context-like object, we store them on this object so that we can unload in the future
+				hooks[name][hookName] = cmd.hooks[hookName].bind(cmd, hookContext);
+				if (hookName == 'loaded') {
+					if (bot.startTime) {
+						hooks[name][hookName]();
+					} else {
+						bot.once('ready', hooks[name][hookName]);
+					}
+				} else {
+					bot.on(hookName, hooks[name][hookName]);
+				}
+			}
+		}
 
 		commands[name] = cmd;
 
@@ -63,11 +84,11 @@ bot.on('ready', () => {
 	bot.connect();
 
 	bot.on('guildMemberAdd', async (guild, member) => {
-		let guildInfo = await getGuildData(msg.channel.guild.id);
+		const guildInfo = await getGuildData(msg.channel.guild.id);
 
 		// welcomer
 		if (guildInfo.welcomer.enabled) {
-			let formattedString = guildInfo.welcomer.message
+			const formattedString = guildInfo.welcomer.message
 				.replace('{user}', member.username)
 				.replace('{server}', guild.name);
 
@@ -89,27 +110,58 @@ bot.on('ready', () => {
 	bot.on('messageCreate', async msg => {
 		if (msg.author.bot) return;
 
-		let guildInfo = await getGuildData(msg.channel.guild.id);
+		const guildInfo = await getGuildData(msg.channel.guild.id);
 
 		if (msg.content.startsWith(guildInfo.prefix)) {
 			// developer's note: this is how to not break everything when someone sets a prefix with spaces in
-			let fixedContent = msg.content.substring(guildInfo.prefix.length);
-			let args = fixedContent.split(' ');
-			let command = args[0];
-
-			args.shift();
+			const fixedContent = msg.content.substring(guildInfo.prefix.length);
+			const args = fixedContent.split(' ');
+			const command = args.shift();
 
 			if (commands[command] !== undefined) {
 				console.info('Executing command ' + command + '.');
 				// context object contains literally everything
 				await commands[command].execute({
 					bot,
+					client: bot,
 					msg,
 					args,
+					fixedContent,
 					commands,
 					db,
 					loggr,
-					guildInfo
+					guildInfo,
+					guild: msg.guild,
+					say(content, args) {
+						return msg.channel.createMessage(content, args);
+					},
+					async ask(content, filter, wholeMessage) {
+						await msg.channel.createMessage(content);
+						const results = await msg.channel.awaitMessages(
+							// Filter is a bit more than a filter, it may also respond to the user's invalid data
+							message => {
+								if (message.author.id != msg.author.id) {
+									console.log('Bad author');
+									return false;
+								}
+								if (filter) {
+									return filter(message);
+								} else {
+									return true;
+								}
+							},
+							{
+								maxMatches: 1,
+								// 1 minute is plenty
+								time: 60000
+							}
+						);
+						if (!results.length) {
+							await this.say("You didn't give a response!");
+							throw new Error('NO_AWAIT_MESSAGES_RESPONSE');
+						}
+						return wholeMessage ? results[0] : results[0] && results[0].content;
+					}
 				});
 			}
 		}
@@ -117,9 +169,9 @@ bot.on('ready', () => {
 })();
 
 async function getGuildData(id) {
-	let guildData = db.collection('guild');
+	const guildData = db.collection('guild');
 
-	let guildInfo = await guildData.findOne({guildId: msg.channel.guild.id});
+	const guildInfo = await guildData.findOne({guildId: id});
 
 	if (guildInfo === null) {
 		await guildData.insertOne(
@@ -143,3 +195,9 @@ async function getGuildData(id) {
 
 	return guildInfo;
 }
+
+process.on('unhandledRejection', function(err) {
+	throw err;
+});
+
+module.exports = {client: bot, bot, db, conn, commands, hooks};

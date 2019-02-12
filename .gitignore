@@ -12,6 +12,7 @@ config.json
 # Package manager logs
 yarn-error.log
 npm-error.log
+pnpm-debug.log
 
 # Not good to mix other lockfiles
 shrinkwrap.yaml
