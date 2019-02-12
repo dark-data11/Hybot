@@ -37,7 +37,7 @@ bot.on('ready', () => {
 			{useNewUrlParser: true}
 		);
 		db = conn.db(config.mongodb.db);
-		console.init('OK');
+		console.info('OK');
 	} catch (e) {
 		console.error(e);
 		return;
@@ -74,7 +74,7 @@ bot.on('ready', () => {
 
 		commands[name] = cmd;
 
-		console.init("Loaded command '" + name + "'");
+		console.info("Loaded command '" + name + "'");
 	}
 
 	console.init('OK');
