@@ -8,10 +8,10 @@ module.exports = class Help extends Command {
 		this.description = 'Get help for commands!';
 	}
 
-	async execute({bot, msg, args, commands}) {
+	async execute({bot, msg, args, commands, guildInfo}) {
 		let helpStr = '```\n';
 		for (let command of Object.keys(commands)) {
-			helpStr += '=';
+			helpStr += guildInfo.prefix;
 			helpStr += commands[command].name;
 			helpStr += ' - ';
 			helpStr += commands[command].description;
