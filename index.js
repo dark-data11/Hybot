@@ -119,6 +119,29 @@ bot.on('ready', () => {
 			const command = args.shift();
 
 			if (commands[command] !== undefined) {
+				console.info('Checking permissions for command ' + command + '.');
+
+				const permissionsMissing = commands[command].checkPermissions(msg.member, bot);
+
+				if (permissionsMissing.user.length > 0 || permissionsMissing.bot.length > 0) {
+					if (permissionsMissing.user.length > 0) {
+						await msg.channel.createMessage({
+							embed: {
+								title: ':x: Permissions Error',
+								description: 'You are missing the following permissions:\n`' + permissionsMissing.user.join('`\n`') + '`'
+							}
+						});
+					} else if (permissionsMissing.bot.length > 0) {
+						await msg.channel.createMessage({
+							embed: {
+								title: ':x: Permissions Error',
+								description: 'I am missing the following permissions:\n' + permissionsMissing.bot.join('`\n`') + '`'
+							}
+						});
+					}
+					return;
+				}
+
 				console.info('Executing command ' + command + '.');
 				// context object contains literally everything
 				await commands[command].execute({

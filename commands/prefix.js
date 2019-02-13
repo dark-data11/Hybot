@@ -6,6 +6,12 @@ module.exports = class Prefix extends Command {
 
 		this.name = 'prefix';
 		this.description = "Sets this guild's prefix.";
+		this.permissionsRequired = {
+			user: [
+				'administrator'
+			],
+			bot: []
+		}
 	}
 
 	async execute({msg, args, db}) {
