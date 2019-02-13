@@ -9,16 +9,58 @@ module.exports = class Help extends Command {
 	}
 
 	async execute({bot, msg, args, commands, guildInfo}) {
-		let helpStr = '```\n';
-		for (let command of Object.keys(commands)) {
-			helpStr += guildInfo.prefix;
-			helpStr += commands[command].name;
-			helpStr += ' - ';
-			helpStr += commands[command].description;
-			helpStr += '\n';
-		}
-		helpStr += '```';
+		let fields = [];
 
-		await msg.channel.createMessage(helpStr);
+		for (let command of Object.keys(commands)) {
+			let cmd = commands[command];
+			let description = '';
+			description += cmd.description;
+
+			if (
+				cmd.permissionsRequired.bot.length > 0 ||
+				cmd.permissionsRequired.user.length > 0
+			) {
+				description += '\n**Required Permissions:**\n';
+
+				if (cmd.permissionsRequired.bot.length > 0) {
+					description +=
+						'Bot: `' + cmd.permissionsRequired.bot.join('`, `') + '`\n';
+				}
+
+				if (cmd.permissionsRequired.user.length > 0) {
+					description +=
+						'User: `' + cmd.permissionsRequired.user.join('`, `') + '`';
+				}
+			}
+
+			fields.push({
+				name: guildInfo.prefix + cmd.name,
+				value: description,
+				inline: true
+			});
+		}
+
+		let chunked = fields.chunk(25);
+
+		let fieldsFirst = chunked[0];
+
+		await msg.channel.createMessage({
+			embed: {
+				title: 'Help',
+				fields: fieldsFirst
+			}
+		});
+
+		chunked.shift();
+
+		if (chunked.length > 0) {
+			for (let fieldsExtra of chunked) {
+				await msg.channel.createMessage({
+					embed: {
+						fields: fieldsExtra
+					}
+				});
+			}
+		}
 	}
 };

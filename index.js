@@ -121,21 +121,33 @@ bot.on('ready', () => {
 			if (commands[command] !== undefined) {
 				console.info('Checking permissions for command ' + command + '.');
 
-				const permissionsMissing = commands[command].checkPermissions(msg.member, bot);
+				const permissionsMissing = commands[command].checkPermissions(
+					msg.member,
+					bot
+				);
 
-				if (permissionsMissing.user.length > 0 || permissionsMissing.bot.length > 0) {
+				if (
+					permissionsMissing.user.length > 0 ||
+					permissionsMissing.bot.length > 0
+				) {
 					if (permissionsMissing.user.length > 0) {
 						await msg.channel.createMessage({
 							embed: {
 								title: ':x: Permissions Error',
-								description: 'You are missing the following permissions:\n`' + permissionsMissing.user.join('`\n`') + '`'
+								description:
+									'You are missing the following permissions:\n`' +
+									permissionsMissing.user.join('`\n`') +
+									'`'
 							}
 						});
 					} else if (permissionsMissing.bot.length > 0) {
 						await msg.channel.createMessage({
 							embed: {
 								title: ':x: Permissions Error',
-								description: 'I am missing the following permissions:\n' + permissionsMissing.bot.join('`\n`') + '`'
+								description:
+									'I am missing the following permissions:\n' +
+									permissionsMissing.bot.join('`\n`') +
+									'`'
 							}
 						});
 					}
@@ -221,6 +233,14 @@ async function getGuildData(id) {
 
 process.on('unhandledRejection', function(err) {
 	throw err;
+});
+
+Object.defineProperty(Array.prototype, 'chunk', {
+	value(n) {
+		return Array(Math.ceil(this.length / n))
+			.fill()
+			.map((_, i) => this.slice(i * n, i * n + n));
+	}
 });
 
 module.exports = {client: bot, bot, db, conn, commands, hooks};
