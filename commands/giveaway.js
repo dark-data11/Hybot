@@ -48,8 +48,12 @@ module.exports = class Giveaway extends Command {
 			}
 		};
 	}
+	calculateRemaining(time) {
+		const remaining = time.getTime() - new Date().getTime();
+		return Math.round(remaining / 1000 / 60) + ' Minutes';
+	}
 	insertGiveaway(ctx, giveaway) {
-		this.giveawayMap.set(giveaway.id, {
+		const giveawayData = {
 			timeoutId: tackle.setLongTimeout(async () => {
 				await this.pickWinners(ctx, giveaway);
 				const message = await ctx.client.getMessage(
@@ -58,6 +62,8 @@ module.exports = class Giveaway extends Command {
 				);
 				message.embeds[0].color = 0xf04747;
 				message.embeds[0].title += ' (ended)';
+				message.embeds[0].fields.pop();
+
 				await ctx.client.editMessage(giveaway.channelID, giveaway.id, {
 					embed: message.embeds[0]
 				});
@@ -65,9 +71,30 @@ module.exports = class Giveaway extends Command {
 				await ctx.db
 					.collection('giveaway_entries')
 					.deleteMany({giveawayID: giveaway.id});
+				clearInterval(giveawayData.intervalId);
 				this.giveawayMap.delete(giveaway.id);
-			}, giveaway.time)
-		});
+			}, giveaway.time),
+			intervalId: setInterval(async () => {
+				const message = await ctx.client.getMessage(
+					giveaway.channelID,
+					giveaway.id
+				);
+				const embed = message.embeds[0];
+				if (new Date().getTime() >= giveaway.time.getTime()) {
+					clearInterval(giveawayData.intervalId);
+					// Just remove it, because it's at the end we can use pop()
+					embed.fields.pop();
+				} else {
+					embed.fields[embed.fields.length - 1].value = this.calculateRemaining(
+						giveaway.time
+					);
+				}
+
+				await ctx.client.editMessage(giveaway.channelID, giveaway.id, {embed});
+				// Every minute...
+			}, 1000 * 60)
+		};
+		this.giveawayMap.set(giveaway.id, giveawayData);
 	}
 	async pickWinners(ctx, giveaway) {
 		const {client, db} = ctx;
@@ -181,6 +208,11 @@ Click the ${TADA} below to enter!`,
 					{
 						name: 'Participant limit',
 						value: String(participantLimit),
+						inline: true
+					},
+					{
+						name: 'Remaining time',
+						value: this.calculateRemaining(timeOffset),
 						inline: true
 					}
 				]

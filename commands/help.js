@@ -1,4 +1,5 @@
 const Command = require('../Command');
+const config = require('../config.json');
 
 module.exports = class Help extends Command {
 	constructor() {
@@ -34,7 +35,7 @@ module.exports = class Help extends Command {
 			}
 
 			fields.push({
-				name: guildInfo.prefix + cmd.name,
+				name: (guildInfo ? guildInfo.prefix : config.prefix) + cmd.name,
 				value: description
 			});
 		}

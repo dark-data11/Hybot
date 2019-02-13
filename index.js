@@ -112,52 +112,56 @@ bot.on('ready', () => {
 	bot.on('messageCreate', async msg => {
 		if (msg.author.bot) return;
 
-		const guildInfo = await getGuildData(msg.channel.guild.id);
+		const guildInfo = msg.guild ? await getGuildData(msg.guild.id) : null;
 
-		var backFromAfk = false;
-
-		for (const afk of guildInfo.afk || []) {
-			if (msg.author.id === afk.id) {
-				const guild = db.collection('guild');
-
-				await guild.updateOne(
-					{guildId: msg.channel.guild.id},
-					{
-						$set: {
-							afk: (guildInfo.afk = guildInfo.afk.filter(
-								v => v.id !== msg.author.id
-							))
-						}
-					}
-				);
-
-				backFromAfk = true;
-			} else if (msg.mentions.length > 0) {
-				for (const mention of msg.mentions) {
-					if (mention.id === afk.id) {
-						await msg.channel.createMessage(
-							mention.username + ' is currently AFK: ' + afk.message
-						);
-					}
-				}
-			}
-		}
+		let backFromAfk = false;
 
 		let ignored = false;
 
-		if (guildInfo.ignored) {
-			if (guildInfo.ignored.users.includes(msg.author.id)) ignored = true;
+		if (guildInfo) {
+			for (const afk of guildInfo.afk || []) {
+				if (msg.author.id === afk.id) {
+					const guild = db.collection('guild');
 
-			for (let role in msg.member.roles) {
-				if (guildInfo.ignored.roles.includes(role.id)) ignored = true;
+					await guild.updateOne(
+						{guildId: msg.channel.guild.id},
+						{
+							$set: {
+								afk: (guildInfo.afk = guildInfo.afk.filter(
+									v => v.id !== msg.author.id
+								))
+							}
+						}
+					);
+
+					backFromAfk = true;
+				} else if (msg.mentions.length > 0) {
+					for (const mention of msg.mentions) {
+						if (mention.id === afk.id) {
+							await msg.channel.createMessage(
+								mention.username + ' is currently AFK: ' + afk.message
+							);
+						}
+					}
+				}
 			}
 
-			if (guildInfo.ignored.channels.includes(msg.channel.id)) ignored = true;
+			if (guildInfo.ignored) {
+				if (guildInfo.ignored.users.includes(msg.author.id)) ignored = true;
+
+				for (let role in msg.member.roles) {
+					if (guildInfo.ignored.roles.includes(role.id)) ignored = true;
+				}
+
+				if (guildInfo.ignored.channels.includes(msg.channel.id)) ignored = true;
+			}
 		}
 
-		if (msg.content.startsWith(guildInfo.prefix) && !ignored) {
+		const prefix = guildInfo ? guildInfo.prefix : config.prefix;
+
+		if (msg.content.startsWith(prefix) && !ignored) {
 			// developer's note: this is how to not break everything when someone sets a prefix with spaces in
-			const fixedContent = msg.content.substring(guildInfo.prefix.length);
+			const fixedContent = msg.content.substring(prefix.length);
 			const args = fixedContent.split(' ');
 			const command = args.shift();
 
@@ -243,11 +247,16 @@ bot.on('ready', () => {
 				};
 				await commands[command].execute(ctx);
 
-				if (command !== 'afk' && backFromAfk && guildInfo.afk_back) {
+				if (
+					command !== 'afk' &&
+					backFromAfk &&
+					guildInfo &&
+					guildInfo.afk_back
+				) {
 					await msg.channel.createMessage('By the way, welcome back!');
 				}
 			}
-		} else if (backFromAfk && guildInfo.afk_back) {
+		} else if (backFromAfk && guildInfo && guildInfo.afk_back) {
 			await msg.channel.createMessage('Welcome back!');
 		}
 	});
