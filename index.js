@@ -250,4 +250,13 @@ Object.defineProperty(Array.prototype, 'chunk', {
 	}
 });
 
+Object.defineProperty(Array.prototype, 'diff', {
+	value(a) {
+		return {
+			added: this.filter(i => !a.includes(i)),
+			removed: a.filter(i => !this.includes(i))
+		};
+	}
+});
+
 module.exports = {client: bot, bot, db, conn, commands, hooks};
