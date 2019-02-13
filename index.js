@@ -112,6 +112,8 @@ bot.on('ready', () => {
 
 		const guildInfo = await getGuildData(msg.channel.guild.id);
 
+		var backFromAfk = false;
+
 		for (let afk of guildInfo.afk) {
 			if (msg.author.id === afk.id) {
 				let guild = db.collection('guild');
@@ -127,9 +129,7 @@ bot.on('ready', () => {
 					}
 				);
 
-				await msg.channel.createMessage(
-					'Welcome back, <@' + msg.author.id + '>!'
-				);
+				backFromAfk = true;
 			} else if (msg.mentions.length > 0) {
 				for (let mention of msg.mentions) {
 					if (mention.id === afk.id) {
@@ -141,15 +141,17 @@ bot.on('ready', () => {
 			}
 		}
 
-		if (msg.content.startsWith(guildInfo.prefix)) {
-			if (guildInfo.ignored.users.includes(msg.author.id)) return;
+		var ignored = false;
 
-			for (let role in msg.member.roles) {
-				if (guildInfo.ignored.roles.includes(role.id)) return;
-			}
+		if (guildInfo.ignored.users.includes(msg.author.id)) ignored = true;
 
-			if (guildInfo.ignored.channels.includes(msg.channel.id)) return;
+		for (let role in msg.member.roles) {
+			if (guildInfo.ignored.roles.includes(role.id)) ignored = true;
+		}
 
+		if (guildInfo.ignored.channels.includes(msg.channel.id)) ignored = true;
+
+		if (msg.content.startsWith(guildInfo.prefix) && !ignored) {
 			// developer's note: this is how to not break everything when someone sets a prefix with spaces in
 			const fixedContent = msg.content.substring(guildInfo.prefix.length);
 			const args = fixedContent.split(' ');
@@ -237,7 +239,13 @@ bot.on('ready', () => {
 						return wholeMessage ? results[0] : results[0] && results[0].content;
 					}
 				});
+
+				if (command !== 'afk' && backFromAfk && guildInfo.afk_back) {
+					await msg.channel.createMessage('By the way, welcome back!');
+				}
 			}
+		} else if (backFromAfk && guildInfo.afk_back) {
+			await msg.channel.createMessage('Welcome back!');
 		}
 	});
 })();
@@ -268,7 +276,8 @@ async function getGuildData(id) {
 				},
 				theme: config.theme,
 				prefix: config.prefix,
-				afk: []
+				afk: [],
+				afk_back: true
 			})
 		);
 	}
