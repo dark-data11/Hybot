@@ -50,7 +50,7 @@ module.exports = class Nick extends Command {
 						nick: ''
 					});
 
-					await say(member.username + "'s nickname has been reset");
+					await say(member.username + "'s nickname has been reset.");
 				} else {
 					await say("I cannot edit that user's nickname.");
 				}
