@@ -208,7 +208,7 @@ bot.on('ready', () => {
 async function getGuildData(id) {
 	const guildData = db.collection('guild');
 
-	const guildInfo = await guildData.findOne({guildId: id});
+	var guildInfo = await guildData.findOne({guildId: id});
 
 	if (guildInfo === null) {
 		await guildData.insertOne(
@@ -223,6 +223,11 @@ async function getGuildData(id) {
 					enabled: false,
 					channel: null,
 					message: 'Farewell, {user}.'
+				},
+				ignored: {
+					roles: [],
+					users: [],
+					channels: []
 				},
 				theme: config.theme,
 				prefix: config.prefix
