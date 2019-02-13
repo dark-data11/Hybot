@@ -181,7 +181,8 @@ Click the ${TADA} below to enter!`,
 						value: String(participantLimit),
 						inline: true
 					}
-				]
+				],
+				color: ctx.guildInfo.theme
 			}
 		});
 		await message.addReaction(TADA);
