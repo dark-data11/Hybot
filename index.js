@@ -112,6 +112,35 @@ bot.on('ready', () => {
 
 		const guildInfo = await getGuildData(msg.channel.guild.id);
 
+		var justAfk = false;
+
+		for (let afk of guildInfo.afk) {
+			if (msg.author.id === afk.id) {
+				let guild = db.collection('guild');
+
+				await guild.updateOne(
+					{guildId: msg.channel.guild.id},
+					{
+						$set: {afk: guildInfo.afk.filter(v => v.id !== msg.author.id)}
+					}
+				);
+
+				await msg.channel.createMessage(
+					'Welcome back, <@' + msg.author.id + '>!'
+				);
+
+				justAfk = true;
+			} else if (msg.mentions.length > 0) {
+				for (let mention of msg.mentions) {
+					if (mention.id === afk.id) {
+						await msg.channel.createMessage(
+							mention.username + ' is currently AFK: ' + afk.message
+						);
+					}
+				}
+			}
+		}
+
 		if (msg.content.startsWith(guildInfo.prefix)) {
 			if (guildInfo.ignored.users.includes(msg.author.id)) return;
 
@@ -175,6 +204,7 @@ bot.on('ready', () => {
 					loggr,
 					guildInfo,
 					guild: msg.guild,
+					justAfk,
 					async say(content, args) {
 						if (content.embed && !content.embed.color)
 							content.embed.color = guildInfo.theme;
@@ -238,7 +268,8 @@ async function getGuildData(id) {
 					channels: []
 				},
 				theme: config.theme,
-				prefix: config.prefix
+				prefix: config.prefix,
+				afk: []
 			})
 		);
 	}
