@@ -26,7 +26,7 @@ module.exports = class Nick extends Command {
 					args.shift(); // remove mention
 
 					await member.edit({
-						nickname: args.join(' ')
+						nick: args.join(' ')
 					});
 
 					await say(
@@ -47,7 +47,7 @@ module.exports = class Nick extends Command {
 					member.punishable(msg.guild.members.find(m => m.id === bot.user.id))
 				) {
 					await member.edit({
-						nickname: ''
+						nick: ''
 					});
 
 					await say(member.username + "'s nickname has been reset");
