@@ -4,7 +4,7 @@ module.exports = class Command {
 		this.description = '<unknown>';
 	}
 
-	async execute({bot, msg, args, commands}) {
+	async execute({msg}) {
 		await msg.channel.createMessage('Broken command?');
 	}
 };
