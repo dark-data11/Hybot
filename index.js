@@ -115,7 +115,7 @@ bot.on('ready', () => {
 		if (msg.content.startsWith(guildInfo.prefix)) {
 			if (guildInfo.ignored.users.includes(msg.author.id)) return;
 
-			for (let role in msg.members.roles) {
+			for (let role in msg.member.roles) {
 				if (guildInfo.ignored.roles.includes(role.id)) return;
 			}
 
