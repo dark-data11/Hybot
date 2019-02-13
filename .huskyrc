@@ -1,5 +1,0 @@
-{
-	"hooks": {
-		"pre-commit": "prettier *.js commands/*.js *.json --write && git add *"
-	}
-}

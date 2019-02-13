@@ -16,6 +16,7 @@ const hooks = {};
 global.Promise = Promise;
 
 Promise.promisifyAll(fs);
+Promise.promisifyAll(require('child_process'));
 Promise.promisifyAll(MongoDB);
 
 loggr.setGlobal();
