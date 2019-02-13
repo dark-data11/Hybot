@@ -133,10 +133,18 @@ bot.on('ready', () => {
 					guildInfo,
 					guild: msg.guild,
 					say(content, args) {
-						return msg.channel.createMessage(content, args);
+						if (typeof content == 'string') {
+							return msg.channel.createMessage({
+								embed: {
+									description: content
+								}
+							});
+						} else {
+							return msg.channel.createMessage(content, args);
+						}
 					},
 					async ask(content, filter, wholeMessage) {
-						await msg.channel.createMessage(content);
+						await this.say(content);
 						const results = await msg.channel.awaitMessages(
 							// Filter is a bit more than a filter, it may also respond to the user's invalid data
 							message => {
