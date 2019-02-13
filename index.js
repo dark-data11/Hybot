@@ -167,8 +167,10 @@ bot.on('ready', () => {
 					loggr,
 					guildInfo,
 					guild: msg.guild,
-					say(content, args) {
-						return msg.channel.createMessage(content, args);
+					async say(content, args) {
+						if (content.embed && !content.embed.color)
+							content.embed.color = guildInfo.theme;
+						return await msg.channel.createMessage(content, args);
 					},
 					async ask(content, filter, wholeMessage) {
 						await msg.channel.createMessage(content);
