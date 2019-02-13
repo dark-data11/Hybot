@@ -21,8 +21,8 @@ module.exports = class Prefix extends Command {
 		let collection = db.collection('guild');
 
 		await collection.updateOne(
-			{ guildId: msg.channel.guild.id },
-			{ $set: { prefix: requestedPrefix } }
+			{guildId: msg.channel.guild.id},
+			{$set: {prefix: requestedPrefix}}
 		);
 
 		await msg.channel.createMessage(

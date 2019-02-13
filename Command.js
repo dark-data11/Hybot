@@ -20,13 +20,15 @@ module.exports = class Command {
 		};
 
 		for (const permission of this.permissionsRequired.user) {
-			if (!member.permission.has(permission)) missingPermisisons.user.push(permission);
+			if (!member.permission.has(permission))
+				missingPermisisons.user.push(permission);
 		}
 
 		const botMember = member.guild.members.find(m => m.id === bot.id);
 
 		for (const permission of this.permissionsRequired.bot) {
-			if (!botMember.permission.has(permission)) missingPermisisons.bot.push(permission);
+			if (!botMember.permission.has(permission))
+				missingPermisisons.bot.push(permission);
 		}
 
 		return missingPermisisons;
