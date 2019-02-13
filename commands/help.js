@@ -35,8 +35,7 @@ module.exports = class Help extends Command {
 
 			fields.push({
 				name: guildInfo.prefix + cmd.name,
-				value: description,
-				inline: true
+				value: description
 			});
 		}
 
