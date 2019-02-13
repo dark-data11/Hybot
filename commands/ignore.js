@@ -22,16 +22,16 @@ module.exports = class Ignore extends Command {
 		let newData = JSON.parse(JSON.stringify(guildInfo.ignored)); // have to do this to prevent guildInfo from getting updated
 
 		for (let userMention of msg.mentions) {
-			if (!newData.users.includes(userMention))
+			if (!newData.users.includes(userMention.id))
 				newData.users.push(userMention.id);
 		}
 
 		for (let roleMention of msg.roleMentions) {
-			if (!newData.roles.includes(userMention)) newData.roles.push(roleMention);
+            if (!newData.roles.includes(roleMention)) newData.roles.push(roleMention);
 		}
 
 		for (let channelMention of msg.channelMentions) {
-			if (!newData.channels.includes(userMention))
+            if (!newData.channels.includes(channelMention))
 				newData.channels.push(channelMention);
 		}
 
