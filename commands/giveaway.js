@@ -81,7 +81,8 @@ module.exports = class Giveaway extends Command {
 			console.log('Found a winner for giveaway...', giveaway, entry);
 			try {
 				const channel = await client.getDMChannel(entry.userID);
-				await client.createMessage(
+				await tackle.say(
+					ctx,
 					channel.id,
 					`Congratulations! You won the giveaway for "${giveaway.name}"!
 ${giveaway.prizeMessage}`
@@ -89,7 +90,8 @@ ${giveaway.prizeMessage}`
 			} catch (err) {
 				console.warn(err);
 				// They've blocked us or disabled DMs presumably... uhhh ?
-				await client.createMessage(
+				await tackle.say(
+					ctx,
 					await client.getDMChannel(giveaway.authorID).id,
 					`An error occurred while sending <@${entry.userID}> their winnings`
 				);
@@ -161,7 +163,7 @@ ${giveaway.prizeMessage}`
 			true
 		)).channelMentions[0];
 
-		const message = await ctx.client.createMessage(channelID, {
+		const message = await tackle.say(ctx, channelID, {
 			embed: {
 				title: `Giveaway of ${title}`,
 				description: `${description}
