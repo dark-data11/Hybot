@@ -8,7 +8,7 @@ module.exports = class Help extends Command {
 		this.description = 'Get help for commands!';
 	}
 
-	async execute({bot, msg, args, commands, guildInfo}) {
+	async execute({bot, msg, args, commands, guildInfo, say}) {
 		let fields = [];
 
 		for (let command of Object.keys(commands)) {
@@ -44,7 +44,7 @@ module.exports = class Help extends Command {
 
 		let fieldsFirst = chunked[0];
 
-		await msg.channel.createMessage({
+		await say({
 			embed: {
 				title: 'Help',
 				fields: fieldsFirst
@@ -55,7 +55,7 @@ module.exports = class Help extends Command {
 
 		if (chunked.length > 0) {
 			for (let fieldsExtra of chunked) {
-				await msg.channel.createMessage({
+				await say({
 					embed: {
 						fields: fieldsExtra
 					}
