@@ -113,6 +113,14 @@ bot.on('ready', () => {
 		const guildInfo = await getGuildData(msg.channel.guild.id);
 
 		if (msg.content.startsWith(guildInfo.prefix)) {
+			if (guildInfo.ignored.users.includes(msg.author.id)) return;
+
+			for (let role in msg.members.roles) {
+				if (guildInfo.ignored.roles.includes(role.id)) return;
+			}
+
+			if (guildInfo.ignored.channels.includes(msg.channel.id)) return;
+
 			// developer's note: this is how to not break everything when someone sets a prefix with spaces in
 			const fixedContent = msg.content.substring(guildInfo.prefix.length);
 			const args = fixedContent.split(' ');

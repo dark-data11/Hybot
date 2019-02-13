@@ -27,11 +27,11 @@ module.exports = class Ignore extends Command {
 		}
 
 		for (let roleMention of msg.roleMentions) {
-            if (!newData.roles.includes(roleMention)) newData.roles.push(roleMention);
+			if (!newData.roles.includes(roleMention)) newData.roles.push(roleMention);
 		}
 
 		for (let channelMention of msg.channelMentions) {
-            if (!newData.channels.includes(channelMention))
+			if (!newData.channels.includes(channelMention))
 				newData.channels.push(channelMention);
 		}
 
