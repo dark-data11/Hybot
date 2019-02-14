@@ -168,6 +168,15 @@ bot.on('ready', () => {
 			if (commands[command] !== undefined) {
 				console.info('Checking permissions for command ' + command + '.');
 
+				if (
+					!ctx.msg.guild &&
+					commands[command].permissionsRequired &&
+					commands[command].permissionsRequired.guildOnly
+				) {
+					await ctx.say(":x: That command doesn't work in DMs!");
+					return;
+				}
+
 				const permissionsMissing = commands[command].checkPermissions(
 					msg.member,
 					bot
@@ -208,6 +217,7 @@ bot.on('ready', () => {
 					client: bot,
 					msg,
 					args,
+					prefix,
 					fixedContent,
 					commands,
 					db,
