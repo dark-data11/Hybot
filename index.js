@@ -169,7 +169,7 @@ bot.on('ready', () => {
 				console.info('Checking permissions for command ' + command + '.');
 
 				if (
-					!ctx.msg.guild &&
+					!msg.guild &&
 					commands[command].permissionsRequired &&
 					commands[command].permissionsRequired.guildOnly
 				) {
