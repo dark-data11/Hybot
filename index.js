@@ -249,13 +249,28 @@ bot.on('ready', () => {
 							}
 						);
 						if (!results.length) {
-							await ctx.say("You didn't give a response!");
 							throw new Error('NO_AWAIT_MESSAGES_RESPONSE');
 						}
 						return wholeMessage ? results[0] : results[0] && results[0].content;
 					}
 				};
-				await commands[command].execute(ctx);
+				try {
+					await commands[command].execute(ctx);
+				} catch (err) {
+					if (err.message == 'NO_AWAIT_MESSAGES_RESPONSE') {
+						await ctx.say('The command timed out while waiting for a response');
+					} else {
+						console.error(err);
+						await ctx.say({
+							embed: {
+								title: `Error occurred in ${command}!`,
+								color: 0xf04747,
+								description:
+									'Sorry! Something went wrong while processing your command!'
+							}
+						});
+					}
+				}
 
 				if (
 					command !== 'afk' &&
