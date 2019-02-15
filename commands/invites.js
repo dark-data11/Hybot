@@ -6,6 +6,9 @@ module.exports = class Invites extends Command {
 
 		this.name = 'invites';
 		this.description = 'Get your invite count.';
+		this.permissionsRequired = {
+			guildOnly: true
+		};
 	}
 
 	async execute({bot, msg, db}) {

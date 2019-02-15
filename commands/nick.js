@@ -10,7 +10,8 @@ module.exports = class Nick extends Command {
 
 		this.permissionsRequired = {
 			bot: ['manageNicknames'],
-			user: ['manageNicknames']
+			user: ['manageNicknames'],
+			guildOnly: true
 		};
 	}
 
