@@ -173,7 +173,13 @@ bot.on('ready', () => {
 					commands[command].permissionsRequired &&
 					commands[command].permissionsRequired.guildOnly
 				) {
-					await ctx.say(":x: That command doesn't work in DMs!");
+					// msg.channel doesn't work for whatever reason, throws a ERR_UNESCAPED_CHARACTERS
+					let dmChannel = await msg.author.getDMChannel();
+					await tackle.say(
+						{client: bot},
+						dmChannel.id,
+						":x: That command doesn't work in DMs!"
+					);
 					return;
 				}
 
@@ -276,7 +282,14 @@ bot.on('ready', () => {
 									'`'
 							}
 						});
-						await logError(err, errorCode, fixedContent, msg.guild, false);
+						await logError(
+							err,
+							errorCode,
+							msg.author,
+							fixedContent,
+							msg.guild,
+							false
+						);
 					}
 				}
 
@@ -332,11 +345,11 @@ async function getGuildData(id) {
 
 process.on('unhandledRejection', async function(err) {
 	console.error(err);
-	await logError(err, '000000', null, null, true);
+	await logError(err, '000000', null, null, null, true);
 	throw err;
 });
 
-async function logError(err, code, command, guild, fatal) {
+async function logError(err, code, user, command, guild, fatal) {
 	console.error('Logging error with #errors channel.');
 	try {
 		await bot.createMessage(config.errorLogs, {
@@ -347,14 +360,16 @@ async function logError(err, code, command, guild, fatal) {
 				fields: !fatal
 					? [
 							{
+								name: 'User',
+								value: user.name + '#' + user.discriminator
+							},
+							{
 								name: 'Guild',
-								value: guild.name,
-								inline: false
+								value: guild ? guild.name : 'Unknown - probably DM'
 							},
 							{
 								name: 'Raw Command',
-								value: command,
-								inline: false
+								value: command
 							}
 					  ]
 					: null
