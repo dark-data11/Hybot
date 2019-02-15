@@ -260,15 +260,21 @@ bot.on('ready', () => {
 					if (err.message == 'NO_AWAIT_MESSAGES_RESPONSE') {
 						await ctx.say('The command timed out while waiting for a response');
 					} else {
+						const errorCode = Math.random()
+							.toString(36)
+							.substring(2, 8);
 						console.error(err);
 						await ctx.say({
 							embed: {
 								title: `Error occurred in ${command}!`,
 								color: 0xf04747,
 								description:
-									'Sorry! Something went wrong while processing your command!'
+									'Sorry! Something went wrong while processing your command!\n\nError Code: `' +
+									errorCode +
+									'`'
 							}
 						});
+						await logError(err, errorCode, fixedContent, msg.guild, false);
 					}
 				}
 
@@ -322,10 +328,41 @@ async function getGuildData(id) {
 	return guildInfo;
 }
 
-process.on('unhandledRejection', function(err) {
+process.on('unhandledRejection', async function(err) {
+	console.error(err);
+	await logError(err, '000000', null, null, true);
 	throw err;
 });
 
+async function logError(err, code, command, guild, fatal) {
+	console.error('Logging error with #errors channel.');
+	try {
+		await bot.createMessage(config.errorLogs, {
+			embed: {
+				title: (fatal ? 'Fatal ' : '') + 'Error - ' + code,
+				description: '```\n' + err.stack + '\n```',
+				color: 0xf04747,
+				fields: !fatal
+					? [
+							{
+								name: 'Guild',
+								value: guild.name,
+								inline: false
+							},
+							{
+								name: 'Raw Command',
+								value: command,
+								inline: false
+							}
+					  ]
+					: null
+			}
+		});
+		console.error('Done.');
+	} catch (e) {
+		console.error(e);
+	}
+}
 Object.defineProperty(Array.prototype, 'chunk', {
 	value(n) {
 		return Array(Math.ceil(this.length / n))
