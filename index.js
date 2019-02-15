@@ -193,7 +193,8 @@ bot.on('ready', () => {
 								description:
 									'You are missing the following permissions:\n`' +
 									permissionsMissing.user.join('`\n`') +
-									'`'
+									'`',
+								color: 0xf04747
 							}
 						});
 					} else if (permissionsMissing.bot.length > 0) {
@@ -201,9 +202,10 @@ bot.on('ready', () => {
 							embed: {
 								title: ':x: Permissions Error',
 								description:
-									'I am missing the following permissions:\n' +
+									'I am missing the following permissions:\n`' +
 									permissionsMissing.bot.join('`\n`') +
-									'`'
+									'`',
+								color: 0xf04747
 							}
 						});
 					}
