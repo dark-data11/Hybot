@@ -9,8 +9,7 @@ module.exports = class Theme extends Command {
 		this.group = 'Management';
 
 		this.permissionsRequired = {
-			user: ['administrator'],
-			bot: []
+			user: ['administrator']
 		};
 	}
 
