@@ -6,6 +6,7 @@ module.exports = class Info extends Command {
 
 		this.name = 'info';
 		this.description = 'Information about Hybot!';
+		this.group = 'Utility';
 	}
 
 	async execute({bot, msg}) {

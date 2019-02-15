@@ -6,6 +6,7 @@ module.exports = class AFK extends Command {
 
 		this.name = 'afk';
 		this.description = 'Marks you as AFK.';
+		this.group = 'Universal';
 	}
 
 	async execute({msg, args, say, db, guildInfo}) {

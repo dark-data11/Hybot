@@ -6,6 +6,8 @@ module.exports = class Theme extends Command {
 
 		this.name = 'theme';
 		this.description = "Sets this guild's embed theme.";
+		this.group = 'Management';
+
 		this.permissionsRequired = {
 			user: ['administrator'],
 			bot: []

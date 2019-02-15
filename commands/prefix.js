@@ -6,6 +6,8 @@ module.exports = class Prefix extends Command {
 
 		this.name = 'prefix';
 		this.description = "Sets this guild's prefix.";
+		this.group = 'Management';
+
 		this.permissionsRequired = {
 			user: ['administrator'],
 			bot: []

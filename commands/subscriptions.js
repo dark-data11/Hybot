@@ -8,6 +8,8 @@ module.exports = class Subscriptions extends Command {
 
 		this.name = 'subscriptions';
 		this.description = 'Allows you to subscribe to updates';
+		this.group = 'Management';
+
 		this.permissionsRequired = {
 			user: ['administrator'],
 			bot: [],

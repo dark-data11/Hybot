@@ -7,15 +7,15 @@ module.exports = class Help extends Command {
 
 		this.name = 'help';
 		this.description = 'Get help for commands!';
+		this.group = 'Universal';
 	}
 
-	async execute({bot, msg, args, commands, guildInfo, say}) {
-		const fields = [];
+	async execute({bot, msg, args, commands, guildInfo, say, prefix}) {
+		const groups = new Map();
 
-		for (let command of Object.keys(commands)) {
-			let cmd = commands[command];
-			let description = '';
-			description += cmd.description;
+		for (const [command, cmd] of Object.entries(commands)) {
+			let description = `**${prefix}${command}**
+${cmd.description}`;
 
 			if (
 				cmd.permissionsRequired.bot.length > 0 ||
@@ -34,9 +34,18 @@ module.exports = class Help extends Command {
 				}
 			}
 
+			const existing = groups.get(cmd.group);
+			if (existing) existing.set(command, description);
+			else groups.set(cmd.group, new Map([[command, description]]));
+		}
+
+		const fields = [];
+
+		for (const [groupName, groupCommands] of groups.entries()) {
 			fields.push({
-				name: (guildInfo ? guildInfo.prefix : config.prefix) + cmd.name,
-				value: description
+				name: String(groupName),
+				value: Array.from(groupCommands.values()).join('\n\n'),
+				inline: true
 			});
 		}
 

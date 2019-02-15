@@ -6,6 +6,7 @@ module.exports = class AFKMessage extends Command {
 
 		this.name = 'afkmessage';
 		this.description = 'Toggles the AFK message.';
+		this.group = 'Management';
 
 		this.permissionsRequired = {
 			user: ['administrator'],
