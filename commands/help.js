@@ -76,7 +76,7 @@ module.exports = class Help extends Command {
 			await say({
 				embed: {
 					title: 'Command List',
-					description: `_Run \`${prefix}help <command>\` for more information on a specific command!_`,
+					description: `Run _\`${prefix}help <command>\`_ for more information on a specific command!`,
 					fields: chunked.shift()
 				}
 			});
