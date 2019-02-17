@@ -11,11 +11,13 @@ module.exports = class Help extends Command {
 	}
 
 	async execute({bot, msg, args, commands, guildInfo, say, prefix}) {
-		const groups = new Map();
-
-		for (const [command, cmd] of Object.entries(commands)) {
-			let description = `**${prefix}${command}**
-${cmd.description}`;
+		if (args[0]) {
+			const command = args[0].toLowerCase();
+			const cmd = commands[command];
+			if (!cmd) {
+				return await say(`Command not found! Run ${prefix}help to see a list!`);
+			}
+			let description = cmd.description;
 
 			if (
 				cmd.permissionsRequired.bot.length > 0 ||
@@ -34,37 +36,51 @@ ${cmd.description}`;
 				}
 			}
 
-			const existing = groups.get(cmd.group);
-			if (existing) existing.set(command, description);
-			else groups.set(cmd.group, new Map([[command, description]]));
-		}
-
-		const fields = [];
-
-		for (const [groupName, groupCommands] of groups.entries()) {
-			fields.push({
-				name: String(groupName),
-				value: Array.from(groupCommands.values()).join('\n\n'),
-				inline: true
+			return await say({
+				embed: {
+					title: `Help for **${prefix}${command}**`,
+					description
+				}
 			});
-		}
+		} else {
+			const groups = new Map();
 
-		const chunked = fields.chunk(25);
-
-		await say({
-			embed: {
-				title: 'Help',
-				fields: chunked.shift()
+			for (const [command, cmd] of Object.entries(commands)) {
+				const description = `${prefix}${command}`;
+				const existing = groups.get(cmd.group);
+				if (existing) existing.set(command, description);
+				else groups.set(cmd.group, new Map([[command, description]]));
 			}
-		});
 
-		if (chunked.length > 0) {
-			for (const fieldsExtra of chunked) {
-				await say({
-					embed: {
-						fields: fieldsExtra
-					}
+			const fields = [];
+
+			for (const [groupName, groupCommands] of groups.entries()) {
+				fields.push({
+					name: '__**' + groupName + '**__',
+					value: Array.from(groupCommands.values())
+						.map(x => '`' + x + '`')
+						.join(', ')
 				});
+			}
+
+			const chunked = fields.chunk(25);
+
+			await say({
+				embed: {
+					title: 'Command List',
+					description: `_Run \`${prefix}help <command>\` for more information on a specific command!_`,
+					fields: chunked.shift()
+				}
+			});
+
+			if (chunked.length > 0) {
+				for (const fieldsExtra of chunked) {
+					await say({
+						embed: {
+							fields: fieldsExtra
+						}
+					});
+				}
 			}
 		}
 	}

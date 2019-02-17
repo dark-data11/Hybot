@@ -2,6 +2,7 @@ module.exports = class Command {
 	constructor() {
 		this.name = '<unknown>';
 		this.description = '<unknown>';
+		this.group = '<unknown>';
 
 		this.permissionsRequired = {
 			user: [],
