@@ -12,7 +12,6 @@ module.exports = class Subscriptions extends Command {
 
 		this.permissionsRequired = {
 			user: ['administrator'],
-			bot: [],
 			guildOnly: true
 		};
 		this.hooks = {

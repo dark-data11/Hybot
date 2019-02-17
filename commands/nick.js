@@ -7,6 +7,12 @@ module.exports = class Nick extends Command {
 		this.name = 'nick';
 		this.description = 'Sets or resets a nickname of a member.';
 		this.group = 'Management';
+
+		this.permissionsRequired = {
+			bot: ['manageNicknames'],
+			user: ['manageNicknames'],
+			guildOnly: true
+		};
 	}
 
 	async execute({bot, msg, args, say}) {

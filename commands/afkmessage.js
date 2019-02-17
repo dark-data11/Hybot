@@ -10,7 +10,7 @@ module.exports = class AFKMessage extends Command {
 
 		this.permissionsRequired = {
 			user: ['administrator'],
-			bot: []
+			guildOnly: true
 		};
 	}
 

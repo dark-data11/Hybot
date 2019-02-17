@@ -47,6 +47,9 @@ module.exports = class Giveaway extends Command {
 				}
 			}
 		};
+		this.permissionsRequired = {
+			guildOnly: true
+		};
 	}
 	calculateRemaining(time) {
 		const remaining = time.getTime() - new Date().getTime();

@@ -173,7 +173,13 @@ bot.on('ready', () => {
 					commands[command].permissionsRequired &&
 					commands[command].permissionsRequired.guildOnly
 				) {
-					await ctx.say(":x: That command doesn't work in DMs!");
+					// msg.channel doesn't work for whatever reason, throws a ERR_UNESCAPED_CHARACTERS
+					let dmChannel = await msg.author.getDMChannel();
+					await tackle.say(
+						{client: bot},
+						dmChannel.id,
+						":x: That command doesn't work in DMs!"
+					);
 					return;
 				}
 
@@ -193,7 +199,8 @@ bot.on('ready', () => {
 								description:
 									'You are missing the following permissions:\n`' +
 									permissionsMissing.user.join('`\n`') +
-									'`'
+									'`',
+								color: 0xf04747
 							}
 						});
 					} else if (permissionsMissing.bot.length > 0) {
@@ -201,9 +208,10 @@ bot.on('ready', () => {
 							embed: {
 								title: ':x: Permissions Error',
 								description:
-									'I am missing the following permissions:\n' +
+									'I am missing the following permissions:\n`' +
 									permissionsMissing.bot.join('`\n`') +
-									'`'
+									'`',
+								color: 0xf04747
 							}
 						});
 					}
@@ -260,15 +268,28 @@ bot.on('ready', () => {
 					if (err.message == 'NO_AWAIT_MESSAGES_RESPONSE') {
 						await ctx.say('The command timed out while waiting for a response');
 					} else {
+						const errorCode = Math.random()
+							.toString(36)
+							.substring(2, 8);
 						console.error(err);
 						await ctx.say({
 							embed: {
 								title: `Error occurred in ${command}!`,
 								color: 0xf04747,
 								description:
-									'Sorry! Something went wrong while processing your command!'
+									'Sorry! Something went wrong while processing your command!\n\nError Code: `' +
+									errorCode +
+									'`'
 							}
 						});
+						await logError(
+							err,
+							errorCode,
+							msg.author,
+							fixedContent,
+							msg.guild,
+							false
+						);
 					}
 				}
 
@@ -322,10 +343,43 @@ async function getGuildData(id) {
 	return guildInfo;
 }
 
-process.on('unhandledRejection', function(err) {
-	throw err;
+process.on('unhandledRejection', async function(err) {
+	console.error(err);
+	await logError(err, '000000', null, null, null, true);
+	process.exit(1);
 });
 
+async function logError(err, code, user, command, guild, fatal) {
+	console.error('Logging error with #errors channel.');
+	try {
+		await bot.createMessage(config.errorLogs, {
+			embed: {
+				title: (fatal ? 'Fatal ' : '') + 'Error - ' + code,
+				description: '```\n' + err.stack + '\n```',
+				color: 0xf04747,
+				fields: !fatal
+					? [
+							{
+								name: 'User',
+								value: user.name + '#' + user.discriminator
+							},
+							{
+								name: 'Guild',
+								value: guild ? guild.name : 'Unknown - probably DM'
+							},
+							{
+								name: 'Raw Command',
+								value: command
+							}
+					  ]
+					: null
+			}
+		});
+		console.error('Done.');
+	} catch (e) {
+		console.error(e);
+	}
+}
 Object.defineProperty(Array.prototype, 'chunk', {
 	value(n) {
 		return Array(Math.ceil(this.length / n))

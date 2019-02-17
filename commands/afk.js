@@ -7,6 +7,10 @@ module.exports = class AFK extends Command {
 		this.name = 'afk';
 		this.description = 'Marks you as AFK.';
 		this.group = 'Universal';
+
+		this.permissionsRequired = {
+			guildOnly: true
+		};
 	}
 
 	async execute({msg, args, say, db, guildInfo}) {

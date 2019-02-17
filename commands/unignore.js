@@ -10,7 +10,7 @@ module.exports = class Unignore extends Command {
 
 		this.permissionsRequired = {
 			user: ['administrator'],
-			bot: []
+			guildOnly: true
 		};
 	}
 
@@ -56,7 +56,9 @@ module.exports = class Unignore extends Command {
 			for (let user of newData.users) {
 				ignoredString += diff.added.includes(user)
 					? '+ ' + user
-					: diff.removed.includes(user) ? '- ' + user : user;
+					: diff.removed.includes(user)
+					? '- ' + user
+					: user;
 				ignoredString += '\n';
 			}
 
@@ -71,7 +73,9 @@ module.exports = class Unignore extends Command {
 			for (let role of newData.roles) {
 				ignoredString += diff.added.includes(role)
 					? '+ ' + role
-					: diff.removed.includes(role) ? '- ' + role : role;
+					: diff.removed.includes(role)
+					? '- ' + role
+					: role;
 				ignoredString += '\n';
 			}
 
@@ -86,7 +90,9 @@ module.exports = class Unignore extends Command {
 			for (let channel of newData.channels) {
 				ignoredString += diff.added.includes(channel)
 					? '+ ' + channel
-					: diff.removed.includes(channel) ? '- ' + channel : channel;
+					: diff.removed.includes(channel)
+					? '- ' + channel
+					: channel;
 				ignoredString += '\n';
 			}
 

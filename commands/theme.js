@@ -10,7 +10,7 @@ module.exports = class Theme extends Command {
 
 		this.permissionsRequired = {
 			user: ['administrator'],
-			bot: []
+			guildOnly: true
 		};
 	}
 
