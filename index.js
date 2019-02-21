@@ -413,6 +413,7 @@ async function getGuildData(id) {
 					users: [],
 					channels: []
 				},
+				aar: [],
 				theme: config.theme,
 				prefix: config.prefix,
 				afk: [],
