@@ -218,6 +218,83 @@ bot.on('ready', () => {
 					return;
 				}
 
+				const transformableArgs = args.map((argument, argumentIndex) => {
+					const argumentObject = {};
+					function defineTransform(key, value) {
+						function transformerError() {
+							const err = new Error('INVALID_COMMAND_ARGUMENTS');
+							err.friendly = `${tackle.ordinal(
+								argumentIndex + 1
+							)} argument is required to be a \`${key}\`!`;
+							return err;
+						}
+
+						argumentObject[key] = async function() {
+							const result = await value.apply(
+								argument,
+								[{transformerError, arg: argument}].concat(arguments)
+							);
+							// Cache the result for later just in case
+							argumentObject[key] = () => Promise.resolve(result);
+							return result;
+						};
+					}
+					defineTransform('userId', async ({transformerError, arg}) => {
+						const mention = arg.match(/^<@!?([0-9]+)>$/);
+						if (mention) return mention[1];
+						const rawId = arg.match(/^[0-9]{17,21}$/);
+						if (rawId) return rawId;
+
+						const matchableUsers = bot.users.filter(user => {
+							const tag = user.username + '#' + user.discriminator;
+							return tag.toLowerCase().includes(arg.toLowerCase());
+						});
+
+						if (matchableUsers) {
+							if (matchableUsers.length == 1) {
+								return matchableUsers[0].id;
+							} else if (matchableUsers.length == 0) {
+								throw transformerError();
+							} else {
+								const userNumber = Number(
+									await ctx.ask(
+										`Multiple matching users found choose one below: \`\`\`
+${matchableUsers
+											.slice(0, 20)
+											.map(
+												(user, i) =>
+													`${i + 1}. ${user.username}#${user.discriminator}`
+											)
+											.join('\n')}
+${
+											matchableUsers.length > 20
+												? `[Note: Showing results 0-20 of ${
+														matchableUsers.length
+													}]`
+												: ''
+										}
+\`\`\``,
+										msg => {
+											const resulting =
+												!isNaN(msg.content) && matchableUsers[msg.content - 1];
+											if (!resulting) {
+												ctx.say(
+													`Please give a number between 1 and ${
+														matchableUsers.length
+													}!`
+												);
+											}
+											return resulting;
+										}
+									)
+								);
+								return matchableUsers[userNumber - 1].id;
+							}
+						}
+					});
+					return argumentObject;
+				});
+
 				console.info('Executing command ' + command + '.');
 				// context object contains literally everything
 				const ctx = {
@@ -225,6 +302,8 @@ bot.on('ready', () => {
 					client: bot,
 					msg,
 					args,
+					transmargs: transformableArgs,
+					transformableArgs,
 					prefix,
 					fixedContent,
 					commands,
@@ -267,6 +346,8 @@ bot.on('ready', () => {
 				} catch (err) {
 					if (err.message == 'NO_AWAIT_MESSAGES_RESPONSE') {
 						await ctx.say('The command timed out while waiting for a response');
+					} else if (err.message == 'INVALID_COMMAND_ARGUMENTS') {
+						await ctx.say(err.friendly);
 					} else {
 						const errorCode = Math.random()
 							.toString(36)
@@ -371,7 +452,7 @@ async function logError(err, code, user, command, guild, fatal) {
 								name: 'Raw Command',
 								value: command
 							}
-					  ]
+						]
 					: null
 			}
 		});
