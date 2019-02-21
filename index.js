@@ -107,6 +107,26 @@ bot.on('ready', () => {
 					.updateOne(guildInfo, {$set: {welcomer: {enabled: false}}});
 			}
 		}
+
+		guildInfo.aar.forEach(role => {
+			let botMember = member.guild.members.find(m => m.id === bot.id);
+
+			if (
+				!botMember.permission.has('administrator') &&
+				!botMember.permission.has('manageRoles')
+			) {
+				console.warn('Cannot assign roles to user, ignoring.');
+				return;
+			}
+
+			tackle.setLongTimeout(async () => {
+				try {
+					await member.addRole(role.roleId, 'AAR');
+				} catch (e) {
+					console.warn('Error while assigning roles: ' + e);
+				}
+			}, new Date(role.date));
+		});
 	});
 
 	bot.on('messageCreate', async msg => {
@@ -260,19 +280,14 @@ bot.on('ready', () => {
 									await ctx.ask(
 										`Multiple matching users found choose one below: \`\`\`
 ${matchableUsers
-											.slice(0, 20)
-											.map(
-												(user, i) =>
-													`${i + 1}. ${user.username}#${user.discriminator}`
-											)
-											.join('\n')}
+	.slice(0, 20)
+	.map((user, i) => `${i + 1}. ${user.username}#${user.discriminator}`)
+	.join('\n')}
 ${
-											matchableUsers.length > 20
-												? `[Note: Showing results 0-20 of ${
-														matchableUsers.length
-													}]`
-												: ''
-										}
+	matchableUsers.length > 20
+		? `[Note: Showing results 0-20 of ${matchableUsers.length}]`
+		: ''
+}
 \`\`\``,
 										msg => {
 											const resulting =
@@ -443,7 +458,7 @@ async function logError(err, code, user, command, guild, fatal) {
 					? [
 							{
 								name: 'User',
-								value: user.name + '#' + user.discriminator
+								value: user.username + '#' + user.discriminator
 							},
 							{
 								name: 'Guild',
@@ -453,7 +468,7 @@ async function logError(err, code, user, command, guild, fatal) {
 								name: 'Raw Command',
 								value: command
 							}
-						]
+					  ]
 					: null
 			}
 		});

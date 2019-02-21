@@ -1,5 +1,7 @@
 const Command = require('../Command');
-const tackle = require('../lib/tackle');
+const prettyMs = require('pretty-ms');
+
+const chrono = require('chrono-node');
 
 const roleRegex = /<@&(\d+)>/;
 
@@ -18,9 +20,9 @@ module.exports = class AAR extends Command {
 		};
 	}
 
-	async execute({bot, msg, args, db, ctx, guildData}) {
+	async execute({bot, msg, args, db, say, guildInfo}) {
 		if (args.length < 1) {
-			await ctx.say('Usage: `aar <add/remove/list>`');
+			await say('Usage: `aar <add/remove/list>`');
 		} else {
 			const collection = db.collection('guild');
 
@@ -28,39 +30,89 @@ module.exports = class AAR extends Command {
 
 			if (subCommand === 'add') {
 				if (args.length < 3) {
-					await ctx.say(
-						'Usage: `aar add <@role> <delay, e.g. "7 days" or "in 5 minutes">'
+					await say(
+						'Usage: `aar add <@role> <delay, e.g. "7 days" or "in 5 minutes">`'
 					);
 				} else {
 					const role = args.shift();
 
 					if (!roleRegex.test(role))
-						return await ctx.say("That isn't a valid role mention!");
+						return await say("That isn't a valid role mention!");
 
 					const roleId = role.match(roleRegex)[1];
 
-					const date = tackle.relativeTime(args.join(' '));
+					for (const autoRoles of guildInfo.aar) {
+						if (autoRoles.roleId === roleId)
+							return await say(
+								'That role is already on the AAR! If you want to change the time, remove and readd it.'
+							);
+					}
+
+					const date = chrono.parse(args.join(' '));
 
 					if (!date)
-						return await ctx.say(
-							'Invalid date! Try "7 days" or "in 5 minutes"!'
-						);
+						return await say('Invalid date! Try "7 days" or "in 5 minutes"!');
 
-					guildData.aar.push({
+					date[0].ref.setMilliseconds(0);
+
+					const dateAsNotRelative = date[0].start.date() - date[0].ref;
+
+					guildInfo.aar.push({
 						roleId,
-						date
+						date: dateAsNotRelative
 					});
 
-					await ctx.say('Added!');
+					await collection.updateOne(
+						{_id: guildInfo._id},
+						{$set: {aar: guildInfo.aar}}
+					);
+
+					await say(
+						'Added! Make sure the bot has a role that is higher than the role you added, or it will fail!'
+					);
 				}
 			} else if (subCommand === 'remove') {
-			} else if (subCommand === 'list') {
-				for (const role of guildData.aar) {
-					// do later
+				if (args.length < 1) {
+					await say('Usage: `aar remove <@role>`');
+				} else {
+					const role = args.shift();
+
+					if (!roleRegex.test(role))
+						return await say("That isn't a valid role mention!");
+
+					const roleId = role.match(roleRegex)[1];
+
+					var found = -1;
+
+					for (const autoRoles in guildInfo.aar) {
+						if (guildInfo.aar[autoRoles].roleId === roleId) found = autoRoles;
+					}
+
+					if (found === -1) return await say('That role is not on the AAR!');
+
+					guildInfo.aar = guildInfo.aar.filter(r => r.roleId !== roleId);
+
+					await collection.updateOne(
+						{_id: guildInfo._id},
+						{$set: {aar: guildInfo.aar}}
+					);
+
+					await say('Removed!');
 				}
-				await ctx.say('NOTE: do later');
+			} else if (subCommand === 'list') {
+				var description = 'AAR Roles:\n\n';
+				for (const role of guildInfo.aar) {
+					description += '<@&';
+					description += role.roleId;
+					description += '> - ';
+					description += prettyMs(role.date, {
+						keepDecimalsOnWholeSeconds: true
+					});
+					description += '\n';
+				}
+				await say(description);
 			} else {
-				await ctx.say('Usage: `aar <add/remove/list>`');
+				await say('Usage: `aar <add/remove/list>`');
 			}
 		}
 	}

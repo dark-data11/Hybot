@@ -18,9 +18,11 @@ module.exports = class Command {
 		};
 
 		if (this.permissionsRequired.user) {
-			for (const permission of this.permissionsRequired.user) {
-				if (!member || !member.permission.has(permission))
-					missingPermisisons.user.push(permission);
+			if (!member.permission.has('administrator')) {
+				for (const permission of this.permissionsRequired.user) {
+					if (!member || !member.permission.has(permission))
+						missingPermisisons.user.push(permission);
+				}
 			}
 		}
 
@@ -28,9 +30,11 @@ module.exports = class Command {
 			const botMember =
 				member && member.guild.members.find(m => m.id === bot.id);
 
-			for (const permission of this.permissionsRequired.bot) {
-				if (!botMember || !botMember.permission.has(permission))
-					missingPermisisons.bot.push(permission);
+			if (botMember && !botMember.permission.has('administrator')) {
+				for (const permission of this.permissionsRequired.bot) {
+					if (!botMember.permission.has(permission))
+						missingPermisisons.bot.push(permission);
+				}
 			}
 		}
 

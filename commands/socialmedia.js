@@ -152,7 +152,9 @@ ${socials.map((social, i) => `${i + 1}. ${social.site} (${social.name})`)}
 		for await (const social of socials) {
 			const at = social.site.toLowerCase().includes('subreddit')
 				? '/r/'
-				: social.site.toLowerCase().includes('site') ? '' : '@';
+				: social.site.toLowerCase().includes('site')
+				? ''
+				: '@';
 			socialFields.push({
 				name: social.site,
 				value: `[${at}${social.name}](${social.url})`,
