@@ -110,7 +110,9 @@ bot.on('ready', () => {
 			}
 		}
 
-		let botMember = guild.members.find(m => m.id === bot.id);
+		let botMember = guild.members.get(bot.user.id);
+
+		console.log(guild.members);
 
 		guildInfo.aar.forEach(role => {
 			if (

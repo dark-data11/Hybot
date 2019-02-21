@@ -27,8 +27,7 @@ module.exports = class Command {
 		}
 
 		if (this.permissionsRequired.bot) {
-			const botMember =
-				member && member.guild.members.find(m => m.id === bot.id);
+			const botMember = member && member.guild.members.get(bot.user.id);
 
 			if (botMember && !botMember.permission.has('administrator')) {
 				for (const permission of this.permissionsRequired.bot) {
