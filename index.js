@@ -88,7 +88,7 @@ bot.on('ready', () => {
 	bot.on('guildMemberAdd', async (guild, member) => {
 		if (member.bot) return;
 
-		const guildInfo = await getGuildData(member.guild.id);
+		const guildInfo = await getGuildData(guild.id);
 
 		// welcomer
 		if (guildInfo.welcomer.enabled) {
@@ -110,9 +110,9 @@ bot.on('ready', () => {
 			}
 		}
 
-		guildInfo.aar.forEach(role => {
-			let botMember = member.guild.members.find(m => m.id === bot.id);
+		let botMember = guild.members.find(m => m.id === bot.id);
 
+		guildInfo.aar.forEach(role => {
 			if (
 				!botMember.permission.has('administrator') &&
 				!botMember.permission.has('manageRoles')
