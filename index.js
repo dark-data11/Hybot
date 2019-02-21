@@ -88,7 +88,7 @@ bot.on('ready', () => {
 	bot.on('guildMemberAdd', async (guild, member) => {
 		if (member.bot) return;
 
-		const guildInfo = await getGuildData(msg.channel.guild.id);
+		const guildInfo = await getGuildData(member.guild.id);
 
 		// welcomer
 		if (guildInfo.welcomer.enabled) {
