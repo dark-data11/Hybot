@@ -5,7 +5,7 @@ module.exports = class Nick extends Command {
 		super();
 
 		this.name = 'nick';
-		this.description = 'Sets or resets a nickname of a member.';
+		this.description = 'Sets the nickname of a server member.';
 		this.group = 'Management';
 
 		this.permissionsRequired = {
@@ -61,7 +61,9 @@ module.exports = class Nick extends Command {
 
 					await say(member.username + "'s nickname has been reset.");
 				} else {
-					await say("I cannot edit that user's nickname.");
+					await say(
+						"I cannot edit that user's nickname. Make sure my highest role is above that of the user whose nickname you're trying to edit!"
+					);
 				}
 			} else {
 				await say('Invalid first argument! `nick <set/reset>`');
