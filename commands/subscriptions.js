@@ -16,7 +16,11 @@ module.exports = class Subscriptions extends Command {
 		};
 		this.hooks = {
 			loaded(ctx) {
-				this.checkInterval = setInterval(() => this.check(ctx), 10 * 60 * 1000);
+				this.checkInterval = setInterval(
+					() => this.check(ctx),
+					// Production demands ip bans
+					process.env.PM_ID ? 3 * 60 * 1000 : 10 * 60 * 1000
+				);
 				this.check(ctx);
 			}
 		};
