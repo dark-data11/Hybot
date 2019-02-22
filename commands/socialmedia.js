@@ -56,6 +56,11 @@ class SocialMedia extends Command {
 					url: 'https://facebook.com/hytalehub',
 					site: 'Facebook',
 					name: 'hytalehub'
+				},
+				{
+					url: 'https://discord.gg/d39e7zy',
+					site: 'Discord',
+					name: 'HytaleHub'
 				}
 			]
 		};
@@ -145,6 +150,7 @@ ${socials.map((social, i) => `${i + 1}. ${social.site} (${social.name})`)}
 		} else {
 			userId = ctx.msg.author.id;
 		}
+		if (userId == ctx.bot.user.id) userId = 'hytalehub';
 		const socials =
 			this.specialSocials[userId] ||
 			(await ctx.db.collection('socials').find({
