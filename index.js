@@ -61,8 +61,12 @@ bot.on('ready', () => {
 				if (hookName == 'loaded') {
 					continue;
 				} else if (hookName == 'unloaded') {
-					const unload = hooks[name][hookName]();
-					if (unload && unload.then) await unload;
+					try {
+						const unload = hooks[name][hookName]();
+						if (unload && unload.then) await unload;
+					} catch (err) {
+						console.error(err);
+					}
 				} else {
 					bot.removeListener(hookName, hooks[name][hookName]);
 				}
@@ -98,9 +102,14 @@ bot.on('ready', () => {
 		await unload(name);
 
 		console.info('Loading command ' + resolvedPath);
-		const Command = require(resolvedPath);
+		try {
+			const Command = require(resolvedPath);
 
-		const cmd = new Command();
+			var cmd = new Command();
+		} catch (err) {
+			console.error(err);
+			return err;
+		}
 		if (cmd.hooks) {
 			hooks[name] = {};
 			for (const hookName in cmd.hooks) {
@@ -108,8 +117,12 @@ bot.on('ready', () => {
 				hooks[name][hookName] = cmd.hooks[hookName].bind(cmd, hookContext);
 				if (hookName == 'loaded') {
 					if (bot.startTime) {
-						const startup = hooks[name][hookName]();
-						if (startup && startup.then) await startup;
+						try {
+							const startup = hooks[name][hookName]();
+							if (startup && startup.then) await startup;
+						} catch (err) {
+							console.error(err);
+						}
 					} else {
 						bot.once('ready', hooks[name][hookName]);
 					}
