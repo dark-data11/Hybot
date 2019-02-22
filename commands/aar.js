@@ -10,11 +10,12 @@ module.exports = class AAR extends Command {
 		super();
 
 		this.name = 'aar';
-		this.description = `Auto assignable roles configuration, usage- 
-\`aar add <@role> <delay, e.g. "7 days" or "in 5 minutes">\`
-You can add a role to be auto assigned to the user after the x amount of delay after the user joins the server.
+		this.description =
+			'Auto assignable roles configuration, You can add a role to be auto assigned to the user after the x amount of delay after the user joins the server.';
+		this.usage = 'aar add <@role> <delay, e.g. "7 days" or "in 5 minutes">';
 
-[Fun Fact!] This feature can be used to minimalize the bots from spam messaging right after they join!`;
+		this.fact =
+			'This feature can be used to minimalize the bots from spam messaging right after they join!';
 		this.group = 'Management';
 
 		this.permissionsRequired = {

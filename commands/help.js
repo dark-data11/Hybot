@@ -17,10 +17,13 @@ module.exports = class Help extends Command {
 			if (!cmd) {
 				return await say(`Command not found! Run ${prefix}help to see a list!`);
 			}
-			let description = cmd.description;
+			let description = `${cmd.description}
 
-			description +=
-				'\n\nUsage: `' + cmd.name + ' ' + (cmd.usage ? cmd.usage : '') + '`';
+Usage: \`${cmd.name}${cmd.usage ? ' ' + cmd.usage : ''}\``;
+
+			if (cmd.fact) {
+				description += `\n\n[Fun Fact!] ${cmd.fact}`;
+			}
 
 			if (
 				(cmd.permissionsRequired.bot &&
