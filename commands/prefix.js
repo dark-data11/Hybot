@@ -16,11 +16,10 @@ module.exports = class Prefix extends Command {
 		this.usage = '<prefix>';
 	}
 
-	async execute({msg, args, db}) {
+	async execute({msg, args, db, say}) {
 		let requestedPrefix = args.join(' ');
 
-		if (requestedPrefix === '')
-			return await msg.channel.createMessage('You must type a prefix!');
+		if (requestedPrefix === '') return await say('You must type a prefix!');
 
 		let collection = db.collection('guild');
 
@@ -29,8 +28,6 @@ module.exports = class Prefix extends Command {
 			{$set: {prefix: requestedPrefix}}
 		);
 
-		await msg.channel.createMessage(
-			'Prefix has been updated to `' + requestedPrefix + '`.'
-		);
+		await say('Prefix has been updated to `' + requestedPrefix + '`.');
 	}
 };
