@@ -7,7 +7,7 @@ module.exports = class Subscriptions extends Command {
 		super();
 
 		this.name = 'subscriptions';
-		this.description = 'Allows you to subscribe to updates';
+		this.description = 'Allows you to subscribe to updates to the Hytale Blog';
 		this.group = 'Management';
 
 		this.permissionsRequired = {
