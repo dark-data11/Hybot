@@ -112,8 +112,6 @@ bot.on('ready', () => {
 
 		let botMember = guild.members.get(bot.user.id);
 
-		console.log(guild.members);
-
 		guildInfo.aar.forEach(role => {
 			if (
 				!botMember.permission.has('administrator') &&
@@ -123,13 +121,16 @@ bot.on('ready', () => {
 				return;
 			}
 
+			let future = new Date();
+			future.setMilliseconds(future.getMilliseconds() + role.date);
+
 			tackle.setLongTimeout(async () => {
 				try {
 					await member.addRole(role.roleId, 'AAR');
 				} catch (e) {
 					console.warn('Error while assigning roles: ' + e);
 				}
-			}, new Date(role.date));
+			}, future);
 		});
 	});
 

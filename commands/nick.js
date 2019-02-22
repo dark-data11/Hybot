@@ -13,6 +13,8 @@ module.exports = class Nick extends Command {
 			user: ['manageNicknames'],
 			guildOnly: true
 		};
+
+		this.usage = '<set/reset> <user mention> [nick (if setting)]';
 	}
 
 	async execute({bot, msg, args, say}) {

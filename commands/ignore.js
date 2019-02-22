@@ -12,6 +12,8 @@ module.exports = class Ignore extends Command {
 			user: ['administrator'],
 			guildOnly: true
 		};
+
+		this.usage = '<roles/users/channels>';
 	}
 
 	async execute({msg, args, db, guildInfo, say}) {

@@ -18,6 +18,8 @@ module.exports = class AAR extends Command {
 			bot: ['manageRoles'],
 			user: ['administrator']
 		};
+
+		this.usage = '<add/remove/list>';
 	}
 
 	async execute({bot, msg, args, db, say, guildInfo}) {

@@ -5,11 +5,17 @@ module.exports = class Info extends Command {
 		super();
 
 		this.name = 'info';
-		this.description = 'Information about Hybot!';
+		this.description = 'Information about HytaleBot!';
 		this.group = 'Utility';
 	}
 
-	async execute({bot, msg}) {
-		await msg.channel.createMessage('This would be some info!');
+	async execute({bot, msg, say}) {
+		await say({
+			embed: {
+				title: 'Information',
+				description:
+					'HytaleBot is a Discord bot developed by HytaleHub. It provides utilities and Hytale-specific commands.'
+			}
+		});
 	}
 };

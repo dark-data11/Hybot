@@ -5,7 +5,7 @@ module.exports = class Invites extends Command {
 		super();
 
 		this.name = 'invites';
-		this.description = 'Get your invite count.';
+		this.description = 'Get your invite count. **NOT IMPLEMENTED**';
 		this.permissionsRequired = {
 			guildOnly: true
 		};

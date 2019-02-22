@@ -5,6 +5,8 @@ module.exports = class Command {
 		this.group = '<unknown>';
 
 		this.permissionsRequired = {};
+
+		this.usage = null;
 	}
 
 	async execute({msg}) {

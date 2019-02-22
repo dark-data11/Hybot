@@ -20,6 +20,8 @@ module.exports = class Subscriptions extends Command {
 				this.check(ctx);
 			}
 		};
+
+		this.usage = '<create/delete>';
 	}
 
 	async publish(ctx, serviceName, post) {
