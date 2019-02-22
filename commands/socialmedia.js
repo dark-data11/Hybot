@@ -135,6 +135,7 @@ ${socials.map((social, i) => `${i + 1}. ${social.site} (${social.name})`)}
 					.collection('socials')
 					.removeOne({_id: socials[socialIndex]._id});
 				await ctx.say('Removed!');
+				return;
 			} else if (this.specialUsers[ctx.args[0].toLowerCase()]) {
 				// Gross but ok
 				userId = ctx.args[0].toLowerCase();
@@ -154,9 +155,7 @@ ${socials.map((social, i) => `${i + 1}. ${social.site} (${social.name})`)}
 		for await (const social of socials) {
 			const at = social.site.toLowerCase().includes('subreddit')
 				? '/r/'
-				: social.site.toLowerCase().includes('site')
-				? ''
-				: '@';
+				: social.site.toLowerCase().includes('site') ? '' : '@';
 			socialFields.push({
 				name: social.site,
 				value: `[${at}${social.name}](${social.url})`,
