@@ -8,6 +8,8 @@ const config = require('./config.json');
 const bot = new Eris(config.token);
 const loggr = new CatLoggr();
 
+const CANCEL_EMOJI = '❌';
+
 require('eris-additions')(Eris); // as the name implies, it adds things to eris
 
 const commands = {};
@@ -430,31 +432,69 @@ ${
 					say(content, args) {
 						return tackle.say(ctx, msg.channel.id, content, args);
 					},
-					async ask(content, filter, wholeMessage) {
-						await ctx.say(content);
-						const results = await msg.channel.awaitMessages(
-							// Filter is a bit more than a filter, it may also respond to the user's invalid data
-							message => {
-								if (message.author.id != msg.author.id) {
-									console.log('Bad author');
-									return false;
-								}
-								if (filter) {
-									return filter(message);
-								} else {
-									return true;
-								}
-							},
-							{
-								maxMatches: 1,
-								// 1 minute is plenty
-								time: 60000
+					ask(content, filter, wholeMessage) {
+						return new Promise(async (realResolve, realReject) => {
+							let dead = false;
+							function destroy() {
+								dead = true;
+								bot.removeListener('messageReactionAdd', onReaction);
 							}
-						);
-						if (!results.length) {
-							throw new Error('NO_AWAIT_MESSAGES_RESPONSE');
-						}
-						return wholeMessage ? results[0] : results[0] && results[0].content;
+							function resolve(val) {
+								if (!dead) {
+									destroy();
+									realResolve(val);
+								}
+							}
+							function reject(val) {
+								if (!dead) {
+									destroy();
+									realReject(val);
+								}
+							}
+							const askingMessage = await ctx.say(content);
+							await askingMessage.addReaction(CANCEL_EMOJI);
+							const onReaction = (message, emoji, userID) => {
+								if (
+									emoji.name == CANCEL_EMOJI &&
+									message.id == askingMessage.id &&
+									userID == msg.author.id
+								) {
+									return reject(
+										new Error('NO_AWAIT_MESSAGES_RESPONSE_CANCELLED')
+									);
+								}
+							};
+							bot.on('messageReactionAdd', onReaction);
+
+							const results = await msg.channel.awaitMessages(
+								// Filter is a bit more than a filter, it may also respond to the user's invalid data
+								message => {
+									if (dead) {
+										return true;
+									}
+									if (message.author.id != msg.author.id) {
+										console.log('Bad author');
+										return false;
+									}
+									if (filter) {
+										return filter(message);
+									} else {
+										return true;
+									}
+								},
+								{
+									maxMatches: 1,
+									// 1 minute is plenty
+									time: 60000
+								}
+							);
+							if (!results.length) {
+								return reject(new Error('NO_AWAIT_MESSAGES_RESPONSE'));
+							}
+							return resolve(
+								wholeMessage ? results[0] : results[0] && results[0].content
+							);
+						});
 					}
 				};
 				try {
@@ -462,6 +502,8 @@ ${
 				} catch (err) {
 					if (err.message == 'NO_AWAIT_MESSAGES_RESPONSE') {
 						await ctx.say('The command timed out while waiting for a response');
+					} else if (err.message == 'NO_AWAIT_MESSAGES_RESPONSE_CANCELLED') {
+						await ctx.say('The command was cancelled');
 					} else if (err.message == 'INVALID_COMMAND_ARGUMENTS') {
 						await ctx.say(err.friendly);
 					} else {
