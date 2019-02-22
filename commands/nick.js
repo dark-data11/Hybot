@@ -14,19 +14,19 @@ module.exports = class Nick extends Command {
 			guildOnly: true
 		};
 
-		this.usage = '<set/reset> <user mention> [nick (if setting)]';
+		this.usage = '<set/reset> <user mention>';
 	}
 
 	async execute({bot, msg, args, say}) {
 		if (args.length === 0) {
-			await say(
-				'You need to provide valid arguments! `nick <set/reset> <user mention> [nick (if setting)]`'
-			);
+			await say('Usage: `nick <set/reset> <user mention>`');
 		} else {
 			let option = args.shift();
 			if (option === 'set') {
 				if (args.length < 2)
-					return await say('You need to provide the mention and nickname!');
+					return await say(
+						'Usage: `nick <set/reset> <user mention> <nickname>`'
+					);
 				let member = msg.guild.members.find(m => m.id === msg.mentions[0].id);
 
 				if (
