@@ -175,7 +175,8 @@ bot.on('ready', () => {
 				if (guildInfo.ignored.users.includes(msg.author.id)) ignored = true;
 
 				for (let role in msg.member.roles) {
-					if (guildInfo.ignored.roles.includes(role.id)) ignored = true;
+					if (guildInfo.ignored.roles.filter(r => r.id === role.id).length > 0)
+						ignored = true;
 				}
 
 				if (guildInfo.ignored.channels.includes(msg.channel.id)) ignored = true;
