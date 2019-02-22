@@ -53,9 +53,53 @@ bot.on('ready', () => {
 	);
 	const hookContext = {bot, db, client: bot};
 
-	for (const file of cmds) {
-		const Command = require('./commands/' + file);
+	async function unload(name) {
+		console.info('Unloading ' + name);
+		const resolvedPath = resolve(name);
+		if (hooks[name]) {
+			for (const hookName in commands[name].hooks) {
+				if (hookName == 'loaded') {
+					continue;
+				} else if (hookName == 'unloaded') {
+					const unload = hooks[name][hookName]();
+					if (unload && unload.then) await unload;
+				} else {
+					bot.removeListener(hookName, hooks[name][hookName]);
+				}
+				delete hooks[name][hookName];
+				hooks[name][hookName] = undefined;
+				delete hooks[name][hookName];
+			}
+			delete hooks[name];
+			hooks[name] = undefined;
+			delete hooks[name];
+		}
+		if (commands[name]) {
+			// Javascript, everyone!
+			delete commands[name];
+			commands[name] = undefined;
+			delete commands[name];
+		}
+
+		delete require.cache[resolvedPath];
+		require.cache[resolvedPath] = undefined;
+		delete require.cache[resolvedPath];
+	}
+
+	function resolve(file) {
+		return require.resolve('./commands/' + file);
+	}
+
+	async function load(file) {
+		console.info('Resolving command... ' + file);
+		const resolvedPath = resolve(file);
+		// Unload just in case!
 		const name = file.substring(0, file.length - 3);
+		await unload(name);
+
+		console.info('Loading command ' + resolvedPath);
+		const Command = require(resolvedPath);
+
 		const cmd = new Command();
 		if (cmd.hooks) {
 			hooks[name] = {};
@@ -64,10 +108,13 @@ bot.on('ready', () => {
 				hooks[name][hookName] = cmd.hooks[hookName].bind(cmd, hookContext);
 				if (hookName == 'loaded') {
 					if (bot.startTime) {
-						hooks[name][hookName]();
+						const startup = hooks[name][hookName]();
+						if (startup && startup.then) await startup;
 					} else {
 						bot.once('ready', hooks[name][hookName]);
 					}
+				} else if (hookName == 'unloaded') {
+					continue;
 				} else {
 					bot.on(hookName, hooks[name][hookName]);
 				}
@@ -78,6 +125,37 @@ bot.on('ready', () => {
 
 		console.info("Loaded command '" + name + "'");
 	}
+
+	for (const file of cmds) {
+		await load(file);
+	}
+
+	async function shutdown() {
+		console.info('Shutting down, unloading commands...');
+		for (const commandName in commands) {
+			await unload(commandName);
+		}
+		console.info('Unloaded all commands, we disconnecting!');
+		await bot.disconnect();
+		console.info('Disconnected client from Discord, exiting');
+		process.exit(0);
+	}
+
+	process.on('SIGINT', function() {
+		console.info('Caught SIGINT!');
+		shutdown();
+	});
+
+	fs.watch('./commands', {recursive: true}, async (type, file) => {
+		if (
+			!file.startsWith('#') &&
+			!file.startsWith('.#') &&
+			file.endsWith('.js')
+		) {
+			console.verbose(`Detected change of type ${type}! Reloading ${file}!`);
+			await load(file);
+		}
+	});
 
 	console.init('OK');
 
@@ -285,14 +363,19 @@ bot.on('ready', () => {
 									await ctx.ask(
 										`Multiple matching users found choose one below: \`\`\`
 ${matchableUsers
-	.slice(0, 20)
-	.map((user, i) => `${i + 1}. ${user.username}#${user.discriminator}`)
-	.join('\n')}
+											.slice(0, 20)
+											.map(
+												(user, i) =>
+													`${i + 1}. ${user.username}#${user.discriminator}`
+											)
+											.join('\n')}
 ${
-	matchableUsers.length > 20
-		? `[Note: Showing results 0-20 of ${matchableUsers.length}]`
-		: ''
-}
+											matchableUsers.length > 20
+												? `[Note: Showing results 0-20 of ${
+														matchableUsers.length
+													}]`
+												: ''
+										}
 \`\`\``,
 										msg => {
 											const resulting =
@@ -473,7 +556,7 @@ async function logError(err, code, user, command, guild, fatal) {
 								name: 'Raw Command',
 								value: command
 							}
-					  ]
+						]
 					: null
 			}
 		});
