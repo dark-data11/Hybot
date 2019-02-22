@@ -8,6 +8,7 @@ module.exports = class Giveaway extends Command {
 		super();
 		this.name = 'giveaway';
 		this.description = 'Creates a giveaway';
+		this.group = 'Management';
 		this.giveawayMap = new Map();
 		this.hooks = {
 			// Fired when this command is loaded
@@ -15,6 +16,13 @@ module.exports = class Giveaway extends Command {
 				const giveawayCursor = await ctx.db.collection('giveaways').find();
 				for await (const giveaway of giveawayCursor) {
 					this.insertGiveaway(ctx, giveaway);
+				}
+			},
+			unloaded(ctx) {
+				for (const giveaway of this.giveawayMap.values()) {
+					console.info('Unloading giveaway...', giveaway);
+					tackle.clearLongTimeout(giveaway.timeoutId);
+					clearInterval(giveaway.intervalId);
 				}
 			},
 			async messageReactionAdd({db, client}, message, emoji, userID) {
