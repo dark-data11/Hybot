@@ -10,7 +10,7 @@ module.exports = class Invites extends Command {
 			guildOnly: true
 		};
 		this.hidden = true;
-		this.sentinel = () => true;
+		this.sentinel = () => false;
 	}
 
 	async execute({bot, msg, db}) {
