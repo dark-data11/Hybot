@@ -28,6 +28,7 @@ module.exports = class Giveaway extends Command {
 			async messageReactionAdd({db, client}, message, emoji, userID) {
 				if (
 					userID != client.user.id &&
+					message.author &&
 					message.author.id == client.user.id &&
 					emoji.name == TADA
 				) {
