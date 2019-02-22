@@ -14,7 +14,7 @@ module.exports = class Help extends Command {
 		if (args[0]) {
 			const command = args[0].toLowerCase();
 			const cmd = commands[command];
-			if (!cmd) {
+			if (!cmd || cmd.hidden) {
 				return await say(`Command not found! Run ${prefix}help to see a list!`);
 			}
 			let description = `${cmd.description}
@@ -60,6 +60,7 @@ Usage: \`${cmd.name}${cmd.usage ? ' ' + cmd.usage : ''}\``;
 			const groups = new Map();
 
 			for (const [command, cmd] of Object.entries(commands)) {
+				if (cmd.hidden) continue;
 				const description = `${prefix}${command}`;
 				const existing = groups.get(cmd.group);
 				if (existing) existing.set(command, description);

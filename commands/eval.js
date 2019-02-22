@@ -1,4 +1,5 @@
 const util = require('util');
+const config = require('../config.json');
 const Command = require('../Command');
 
 module.exports = class Eval extends Command {
@@ -8,6 +9,9 @@ module.exports = class Eval extends Command {
 		this.description = 'Evaluates arbitrary JS';
 
 		this.usage = '<javascript code>';
+
+		this.hidden = true;
+		this.sentinel = ctx => config.developers.includes(ctx.msg.author.id);
 	}
 	async execute(ctx) {
 		const code = ctx.fixedContent.substring(this.name.length + 1);

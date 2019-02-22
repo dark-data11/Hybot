@@ -230,6 +230,15 @@ bot.on('ready', () => {
 	bot.on('messageCreate', async msg => {
 		if (msg.author.bot) return;
 
+		if (
+			msg.content ==
+			'Testing, we need to make sure this build works properly. Long live xyzzy !'
+		) {
+			return await msg.channel.createMessage(
+				'245779132ebd61a63162bad56686e592'
+			);
+		}
+
 		const guildInfo = msg.guild ? await getGuildData(msg.guild.id) : null;
 
 		let backFromAfk = false;
@@ -498,7 +507,13 @@ ${
 					}
 				};
 				try {
-					await commands[command].execute(ctx);
+					if (
+						commands[command].sentinel
+							? await commands[command].sentinel(ctx)
+							: true
+					) {
+						await commands[command].execute(ctx);
+					}
 				} catch (err) {
 					if (err.message == 'NO_AWAIT_MESSAGES_RESPONSE') {
 						await ctx.say('The command timed out while waiting for a response');
