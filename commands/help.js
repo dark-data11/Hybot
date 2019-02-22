@@ -20,7 +20,7 @@ module.exports = class Help extends Command {
 			let description = cmd.description;
 
 			description +=
-				'\n\nUsage: `' + cmd.name + ' ' + cmd.usage ? cmd.usage : '';
+				'\n\nUsage: `' + cmd.name + ' ' + (cmd.usage ? cmd.usage : '');
 
 			if (
 				(cmd.permissionsRequired.bot &&
