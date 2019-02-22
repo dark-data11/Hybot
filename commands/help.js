@@ -19,13 +19,16 @@ module.exports = class Help extends Command {
 			}
 			let description = cmd.description;
 
+			description +=
+				'\n\nUsage: `' + cmd.name + ' ' + (cmd.usage ? cmd.usage : '') + '`';
+
 			if (
 				(cmd.permissionsRequired.bot &&
 					cmd.permissionsRequired.bot.length > 0) ||
 				(cmd.permissionsRequired.user &&
 					cmd.permissionsRequired.user.length > 0)
 			) {
-				description += '\n**Required Permissions:**\n';
+				description += '\n\n**Required Permissions:**\n';
 
 				if (
 					cmd.permissionsRequired.bot &&

@@ -12,6 +12,8 @@ module.exports = class Theme extends Command {
 			user: ['administrator'],
 			guildOnly: true
 		};
+
+		this.usage = '<theme hex>';
 	}
 
 	async execute(ctx) {

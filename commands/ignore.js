@@ -5,20 +5,20 @@ module.exports = class Ignore extends Command {
 		super();
 
 		this.name = 'ignore';
-		this.description = 'Ignore multiple roles/users/channels.';
+		this.description = 'Make the bot ignore multiple roles/users/channels.';
 		this.group = 'Management';
 
 		this.permissionsRequired = {
 			user: ['administrator'],
 			guildOnly: true
 		};
+
+		this.usage = '<roles/users/channels>';
 	}
 
 	async execute({msg, args, db, guildInfo, say}) {
 		if (args.length === 0)
-			return await say(
-				'Please provide any number of roles, users, or channels.'
-			);
+			return await say('Usage: `ignore <roles/users/channels>`');
 
 		let newData = JSON.parse(JSON.stringify(guildInfo.ignored)); // have to do this to prevent guildInfo from getting updated
 

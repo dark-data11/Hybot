@@ -12,6 +12,8 @@ module.exports = class Prefix extends Command {
 			user: ['administrator'],
 			guildOnly: true
 		};
+
+		this.usage = '<prefix>';
 	}
 
 	async execute({msg, args, db}) {

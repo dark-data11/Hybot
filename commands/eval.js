@@ -6,6 +6,8 @@ module.exports = class Eval extends Command {
 		super();
 		this.name = 'eval';
 		this.description = 'Evaluates arbitrary JS';
+
+		this.usage = '<javascript code>';
 	}
 	async execute(ctx) {
 		const code = ctx.fixedContent.substring(this.name.length + 1);

@@ -73,6 +73,8 @@ class SocialMedia extends Command {
 					'https://media.discordapp.net/attachments/485428830060675120/531543164637675532/Webp.net-resizeimage_412.png'
 			}
 		};
+
+		this.usage = '[username] OR <create/delete>';
 	}
 
 	async execute(ctx) {

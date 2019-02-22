@@ -11,6 +11,8 @@ module.exports = class AFK extends Command {
 		this.permissionsRequired = {
 			guildOnly: true
 		};
+
+		this.usage = '[afk message]';
 	}
 
 	async execute({msg, args, say, db, guildInfo}) {

@@ -21,6 +21,8 @@ You can add a role to be auto assigned to the user after the x amount of delay a
 			bot: ['manageRoles'],
 			user: ['administrator']
 		};
+
+		this.usage = '<add/remove/list>';
 	}
 
 	async execute({bot, msg, args, db, say, guildInfo}) {
@@ -103,16 +105,23 @@ You can add a role to be auto assigned to the user after the x amount of delay a
 					await say('Removed!');
 				}
 			} else if (subCommand === 'list') {
-				var description = 'AAR Roles:\n\n';
-				for (const role of guildInfo.aar) {
-					description += '<@&';
-					description += role.roleId;
-					description += '> - ';
-					description += prettyMs(role.date, {
-						keepDecimalsOnWholeSeconds: true
-					});
-					description += '\n';
+				var description = '';
+
+				if (guildInfo.aar.length > 0) {
+					description = 'AAR Roles:\n\n';
+					for (const role of guildInfo.aar) {
+						description += '<@&';
+						description += role.roleId;
+						description += '> - ';
+						description += prettyMs(role.date, {
+							keepDecimalsOnWholeSeconds: true
+						});
+						description += '\n';
+					}
+				} else {
+					description = 'There are no AARs set up yet!';
 				}
+
 				await say(description);
 			} else {
 				await say('Usage: `aar <add/remove/list>`');
