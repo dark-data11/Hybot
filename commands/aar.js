@@ -102,16 +102,23 @@ module.exports = class AAR extends Command {
 					await say('Removed!');
 				}
 			} else if (subCommand === 'list') {
-				var description = 'AAR Roles:\n\n';
-				for (const role of guildInfo.aar) {
-					description += '<@&';
-					description += role.roleId;
-					description += '> - ';
-					description += prettyMs(role.date, {
-						keepDecimalsOnWholeSeconds: true
-					});
-					description += '\n';
+				var description = '';
+
+				if (guildInfo.aar.length > 0) {
+					description = 'AAR Roles:\n\n';
+					for (const role of guildInfo.aar) {
+						description += '<@&';
+						description += role.roleId;
+						description += '> - ';
+						description += prettyMs(role.date, {
+							keepDecimalsOnWholeSeconds: true
+						});
+						description += '\n';
+					}
+				} else {
+					description = 'There are no AARs set up yet!';
 				}
+
 				await say(description);
 			} else {
 				await say('Usage: `aar <add/remove/list>`');
