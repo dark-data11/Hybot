@@ -173,10 +173,10 @@ ${socials.map((social, i) => `${i + 1}. ${social.site} (${social.name})`)}
 			this.specialUsers[userId] ||
 			ctx.client.users.get(userId) ||
 			(await ctx.client.requestHandler
-				.request('GET', Discord.Endpoints.USER(userID), true)
+				.request('GET', Discord.Endpoints.USER(userId), true)
 				.then(user => {
 					const properUser = new Discord.User(user, this);
-					return thsi.users.set(user.id, properUser);
+					this.users.set(user.id, properUser);
 					return properUser;
 				})).catch(err => null);
 		if (!user) {

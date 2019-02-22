@@ -31,7 +31,7 @@ return ${code.substring(lastOpIndex + 1)}
 		}
 	}
 	async reportValue(ctx, value) {
-		await ctx.say(`\`\`\`\js
+		await ctx.say(`\`\`\`js
 ${util.inspect(value)}
 \`\`\``);
 	}

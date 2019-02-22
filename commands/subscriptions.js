@@ -54,7 +54,7 @@ module.exports = class Subscriptions extends Command {
 	async check(ctx) {
 		console.info('Checking for subscription updates');
 		const posts = await fetch(
-			'https://hytale.com/api/blog/post/published'
+			'https://hytale.com/api/blog/post/published?_=' + Date.now()
 		).then(r => r.json());
 		const postMap = new Map(posts.map(post => [post._id, post]));
 

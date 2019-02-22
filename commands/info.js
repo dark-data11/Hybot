@@ -13,7 +13,7 @@ module.exports = class Info extends Command {
 		await say({
 			embed: {
 				title: 'Information',
-				description: `HytaleBot is a Discord bot developed by HytaleHub to provide all the users with a plenty full of features for the discord server owners to use and customize/manage their server and to get news for all the latest Hytale Blog posts.
+				description: `HytaleBot is a Discord bot developed by HytaleHub to provide Hytale Discord server owners with a custom Hytale-oriented Discord Bot to use to better customize their servers, as well as to get all the latest news from blog posts on Hytale.com
 Run \`${prefix}socialmedia HytaleHub\` to get all of our social media!
 Or run \`${prefix}socialmedia Hytale\` for the social media of Hytale itself!`
 			}
