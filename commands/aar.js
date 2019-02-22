@@ -15,7 +15,7 @@ module.exports = class AAR extends Command {
 		this.usage = 'aar add <@role> <delay, e.g. "7 days" or "in 5 minutes">';
 
 		this.fact =
-			'This feature can be used to minimalize the bots from spam messaging right after they join!';
+			'This feature can be used to reduce the impact of spam bots messaging right after join!';
 		this.group = 'Management';
 
 		this.permissionsRequired = {

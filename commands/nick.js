@@ -45,7 +45,9 @@ module.exports = class Nick extends Command {
 							'`.'
 					);
 				} else {
-					await say("I cannot edit that user's nickname.");
+					await say(
+						"I cannot edit that user's nickname. Make sure my highest role is above that of the user whose nickname you're trying to edit!"
+					);
 				}
 			} else if (option === 'reset') {
 				if (args.length < 1)
