@@ -1,4 +1,5 @@
 const Command = require('../Command.js');
+const Errors = require('../Errors');
 const tackle = require('../lib/tackle');
 
 const TADA = '🎉';
@@ -67,18 +68,38 @@ module.exports = class Giveaway extends Command {
 	insertGiveaway(ctx, giveaway) {
 		const giveawayData = {
 			timeoutId: tackle.setLongTimeout(async () => {
-				await this.pickWinners(ctx, giveaway);
-				const message = await ctx.client.getMessage(
-					giveaway.channelID,
-					giveaway.id
-				);
-				message.embeds[0].color = 0xf04747;
-				message.embeds[0].title += ' (ended)';
-				message.embeds[0].fields.pop();
+				let giveawayValid = true;
+				try {
+					const message = await ctx.client.getMessage(
+						giveaway.channelID,
+						giveaway.id
+					);
+					message.embeds[0].color = 0xf04747;
+					message.embeds[0].title += ' (ended)';
+					message.embeds[0].fields.pop();
 
-				await ctx.client.editMessage(giveaway.channelID, giveaway.id, {
-					embed: message.embeds[0]
-				});
+					await ctx.client.editMessage(giveaway.channelID, giveaway.id, {
+						embed: message.embeds[0]
+					});
+				} catch (err) {
+					if (err.code == Errors.UnknownMessage) {
+						// They deleted the message, no giveaway for them
+						giveawayValid = false;
+					} else {
+						// We're going to continue, otherwise we loop on this
+						console.error(err);
+					}
+				}
+				if (giveawayValid) {
+					try {
+						await this.pickWinners(ctx, giveaway);
+					} catch (err) {
+						console.error(err);
+					}
+				}
+
+				console.info('Giveaway ended, deleting entries');
+
 				await ctx.db.collection('giveaways').deleteOne({id: giveaway.id});
 				await ctx.db
 					.collection('giveaway_entries')
@@ -116,7 +137,9 @@ module.exports = class Giveaway extends Command {
 				$sample: {size: Number(giveaway.winnerCount)}
 			}
 		]);
+		const entryArray = [];
 		for await (const entry of winningEntries) {
+			entryArray.push(entry);
 			console.log('Found a winner for giveaway...', giveaway, entry);
 			try {
 				const channel = await client.getDMChannel(entry.userID);
@@ -149,6 +172,17 @@ ${giveaway.prizeMessage}`
 						console.error(err);
 					}
 				}
+			}
+
+			try {
+				await tackle.say(
+					ctx,
+					giveaway.channelID,
+					`Congratulations! The following users won the ${giveaway.name}!
+${entryArray.map(entry => `<@${entry.userID}>`).join('\n')}`
+				);
+			} catch (err) {
+				console.error(err);
 			}
 		}
 	}

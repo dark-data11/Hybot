@@ -13,6 +13,9 @@ const CANCEL_EMOJI = '❌';
 
 require('eris-additions')(Eris); // as the name implies, it adds things to eris
 
+const DiscordHTTPError = require('eris/lib/errors/DiscordHTTPError');
+const DiscordRESTError = require('eris/lib/errors/DiscordRESTError');
+
 const commands = {};
 const hooks = {};
 
@@ -618,7 +621,14 @@ async function getGuildData(id) {
 process.on('unhandledRejection', async function(err) {
 	console.error(err);
 	await logError(err, '000000', null, null, null, true);
-	// process.exit(1);
+	if (
+		!(err instanceof DiscordHTTPError) &&
+		!(err instanceof DiscordRESTError)
+	) {
+		process.exit(1);
+	} else {
+		console.log('Not crashing, not a fatal error');
+	}
 });
 
 async function logError(err, code, user, command, guild, fatal) {
