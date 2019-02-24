@@ -32,6 +32,7 @@
 	"pkg": {
 		"scripts": [
 			"./commands/*.js",
+			"./commands",
 			"./node_modules/eris-additions/lib/**/*.js"
 		]
 	}

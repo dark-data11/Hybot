@@ -7,6 +7,7 @@ const tackle = require('./lib/tackle');
 const config = require('./env');
 const bot = new Eris(config.token);
 const loggr = new CatLoggr();
+const path = require('path');
 
 const CANCEL_EMOJI = '❌';
 
@@ -17,7 +18,7 @@ const hooks = {};
 
 global.Promise = Promise;
 
-Promise.promisifyAll(fs);
+// Promise.promisifyAll(fs);
 Promise.promisifyAll(require('child_process'));
 Promise.promisifyAll(MongoDB);
 
@@ -26,8 +27,21 @@ loggr.setGlobal();
 let db;
 let conn;
 
-bot.on('ready', () => {
+bot.on('ready', async () => {
 	console.info('Hello world!');
+	const presenceSentinels = [
+		() => `${config.prefix}help | hytalebot.net`,
+		() => `on ${bot.guilds.size} servers`,
+		() => `${config.prefix}support for support`
+	];
+
+	async function setPresence() {
+		await bot.editStatus('online', {
+			name: `${config.prefix}help | hytalebot.net`
+		});
+	}
+	setInterval(async () => await setPresence(), 10 * 1000);
+	await setPresence();
 });
 
 (async () => {
@@ -49,10 +63,12 @@ bot.on('ready', () => {
 
 	console.init('Loading commands...');
 
-	const cmds = (await fs.readdirAsync('./commands')).filter(
-		file =>
-			!file.startsWith('#') && !file.startsWith('.#') && file.endsWith('.js')
-	);
+	const cmds = fs
+		.readdirSync(path.join(__dirname, './commands'))
+		.filter(
+			file =>
+				!file.startsWith('#') && !file.startsWith('.#') && file.endsWith('.js')
+		);
 	const hookContext = {bot, db, client: bot};
 
 	async function unload(name) {
@@ -161,16 +177,17 @@ bot.on('ready', () => {
 		shutdown();
 	});
 
-	fs.watch('./commands', {recursive: true}, async (type, file) => {
-		if (
-			!file.startsWith('#') &&
-			!file.startsWith('.#') &&
-			file.endsWith('.js')
-		) {
-			console.verbose(`Detected change of type ${type}! Reloading ${file}!`);
-			await load(file);
-		}
-	});
+	if (!process.pkg)
+		fs.watch('./commands', {recursive: true}, async (type, file) => {
+			if (
+				!file.startsWith('#') &&
+				!file.startsWith('.#') &&
+				file.endsWith('.js')
+			) {
+				console.verbose(`Detected change of type ${type}! Reloading ${file}!`);
+				await load(file);
+			}
+		});
 
 	console.init('OK');
 
@@ -635,6 +652,7 @@ async function logError(err, code, user, command, guild, fatal) {
 		console.error(e);
 	}
 }
+
 Object.defineProperty(Array.prototype, 'chunk', {
 	value(n) {
 		return Array(Math.ceil(this.length / n))

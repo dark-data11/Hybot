@@ -8,5 +8,6 @@ module.exports = {
 	},
 	theme: process.env.THEME,
 	prefix: 'h!' || process.env.PREFIX,
-	developers: ['96269247411400704', '196769986071625728']
+	developers: ['96269247411400704', '196769986071625728'],
+	errorLogs: process.env.ERROR_LOGS || '546065895064338432'
 };
