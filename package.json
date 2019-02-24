@@ -3,9 +3,7 @@
 	"scripts": {
 		"start": "node index.js"
 	},
-	"bin": [
-		"index.js"
-	],
+	"bin": ["index.js"],
 	"dependencies": {
 		"bluebird": "^3.5.3",
 		"cat-loggr": "^1.0.17",
@@ -30,10 +28,6 @@
 		}
 	},
 	"pkg": {
-		"scripts": [
-			"./commands/*.js",
-			"./commands",
-			"./node_modules/eris-additions/lib/**/*.js"
-		]
+		"scripts": ["./commands/*.js", "./node_modules/eris-additions/lib/**/*.js"]
 	}
 }
