@@ -128,12 +128,27 @@ ${giveaway.prizeMessage}`
 				);
 			} catch (err) {
 				console.warn(err);
-				// They've blocked us or disabled DMs presumably... uhhh ?
-				await tackle.say(
-					ctx,
-					await client.getDMChannel(giveaway.authorID).id,
-					`An error occurred while sending <@${entry.userID}> their winnings`
-				);
+				try {
+					// They've blocked us or disabled DMs presumably... uhhh ?
+					await tackle.say(
+						ctx,
+						await client.getDMChannel(giveaway.authorID).id,
+						`An error occurred while sending <@${entry.userID}> their winnings`
+					);
+				} catch (err) {
+					// Yikes.
+					try {
+						await tackle.say(
+							ctx,
+							giveaway.channelID,
+							`Sorry, an error occurred while sending <@${
+								entry.userID
+							}> their winnings`
+						);
+					} catch (err) {
+						console.error(err);
+					}
+				}
 			}
 		}
 	}

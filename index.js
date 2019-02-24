@@ -618,7 +618,7 @@ async function getGuildData(id) {
 process.on('unhandledRejection', async function(err) {
 	console.error(err);
 	await logError(err, '000000', null, null, null, true);
-	process.exit(1);
+	// process.exit(1);
 });
 
 async function logError(err, code, user, command, guild, fatal) {
