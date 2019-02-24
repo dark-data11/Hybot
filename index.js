@@ -26,8 +26,11 @@ loggr.setGlobal();
 let db;
 let conn;
 
-bot.on('ready', () => {
+bot.on('ready', async () => {
 	console.info('Hello world!');
+	await bot.editStatus('online', {
+		name: 'h!help - https://hytalebot.net'
+	});
 });
 
 (async () => {
@@ -630,6 +633,7 @@ async function logError(err, code, user, command, guild, fatal) {
 		console.error(e);
 	}
 }
+
 Object.defineProperty(Array.prototype, 'chunk', {
 	value(n) {
 		return Array(Math.ceil(this.length / n))
