@@ -43,7 +43,7 @@ bot.on('ready', async () => {
 			name: `${config.prefix}help | hytalebot.net`
 		});
 	}
-	setInterval(async () => await setPresence(), 10 * 1000);
+	setInterval(async () => await setPresence(), 30 * 1000);
 	await setPresence();
 });
 
