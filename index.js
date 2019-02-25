@@ -38,9 +38,14 @@ bot.on('ready', async () => {
 		() => `${config.prefix}support for support`
 	];
 
+	let index = -1;
+
 	async function setPresence() {
+		console.log('Setting presence...');
+		index++;
+		if (index >= presenceSentinels.length) index = 0;
 		await bot.editStatus('online', {
-			name: `${config.prefix}help | hytalebot.net`
+			name: presenceSentinels[index]()
 		});
 	}
 	setInterval(async () => await setPresence(), 30 * 1000);
