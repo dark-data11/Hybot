@@ -14,5 +14,6 @@ module.exports = {
 		process.env.STAT_GUILDS.split(',')) || [
 		'544172817936154634',
 		'526271182840922133'
-	]
+	],
+	dblToken: process.env.DBL_TOKEN
 };
