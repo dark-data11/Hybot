@@ -85,6 +85,8 @@ module.exports = class Giveaway extends Command {
 					if (err.code == Errors.UnknownMessage) {
 						// They deleted the message, no giveaway for them
 						giveawayValid = false;
+					} else if (err.code == Errors.MissingAccess) {
+						console.warn('MissingAccess while ending a giveaway, yikes');
 					} else {
 						// We're going to continue, otherwise we loop on this
 						console.error(err);
@@ -108,10 +110,32 @@ module.exports = class Giveaway extends Command {
 				this.giveawayMap.delete(giveaway.id);
 			}, giveaway.time),
 			intervalId: setInterval(async () => {
-				const message = await ctx.client.getMessage(
-					giveaway.channelID,
-					giveaway.id
-				);
+				try {
+					// Has to be var because try{...}catch(...){...}
+					var message = await ctx.client.getMessage(
+						giveaway.channelID,
+						giveaway.id
+					);
+				} catch (err) {
+					if (err.code == Errors.UnknownMessage) {
+						console.info('UnknownMessage while ticking timer, deleting...');
+						await ctx.db.collection('giveaways').deleteOne({id: giveaway.id});
+						await ctx.db
+							.collection('giveaway_entries')
+							.deleteMany({giveawayID: giveaway.id});
+						clearInterval(giveawayData.intervalId);
+						this.giveawayMap.delete(giveaway.id);
+						return;
+					} else if (err.code == Errors.MissingAccess) {
+						// What can one do here anyways?
+						console.warn(
+							"MissingAccess while ticking timer, ignoring as it's non-crucial"
+						);
+						return;
+					} else {
+						throw err;
+					}
+				}
 				const embed = message.embeds[0];
 				if (new Date().getTime() >= giveaway.time.getTime()) {
 					clearInterval(giveawayData.intervalId);
