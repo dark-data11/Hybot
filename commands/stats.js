@@ -5,11 +5,8 @@ module.exports = class Stats extends Command {
 	constructor() {
 		super();
 		this.name = 'stats';
+		this.group = 'Utility';
 		this.description = 'Shows statistics';
-		this.hidden = true;
-		this.sentinel = ctx =>
-			config.statisticsGuilds &&
-			config.statisticsGuilds.includes(ctx.msg.guild.id);
 	}
 
 	async execute(ctx) {
