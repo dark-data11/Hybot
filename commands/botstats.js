@@ -25,7 +25,8 @@ module.exports = class BotStats extends Command {
 					{
 						method: 'POST',
 						headers: {
-							Authorization: config.dblToken
+							Authorization: config.dblToken,
+							'Content-Type': 'application/json'
 						},
 						body: JSON.stringify({server_count: guildCount}),
 						redirect: 'follow'
