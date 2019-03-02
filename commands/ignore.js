@@ -57,7 +57,7 @@ module.exports = class Ignore extends Command {
 					? '+ <@' + user + '>'
 					: diff.removed.includes(user)
 					? '- <@' + user + '>'
-					: user;
+					: '<@' + user + '>';
 				ignoredString += '\n';
 			}
 		}
@@ -72,7 +72,7 @@ module.exports = class Ignore extends Command {
 					? '+ <@&' + role + '>'
 					: diff.removed.includes(role)
 					? '- <@&' + role + '>'
-					: role;
+					: '<@&' + role + '>';
 				ignoredString += '\n';
 			}
 		}
@@ -87,7 +87,7 @@ module.exports = class Ignore extends Command {
 					? '+ <#' + channel + '>'
 					: diff.removed.includes(channel)
 					? '- <#' + channel + '>'
-					: channel;
+					: '<#' + channel + '>';
 				ignoredString += '\n';
 			}
 		}
