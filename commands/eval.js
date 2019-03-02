@@ -1,5 +1,5 @@
 const util = require('util');
-const config = require('../config.json');
+const config = require('../env');
 const Command = require('../Command');
 
 module.exports = class Eval extends Command {

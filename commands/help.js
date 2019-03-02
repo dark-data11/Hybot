@@ -1,5 +1,4 @@
 const Command = require('../Command');
-const config = require('../config.json');
 
 module.exports = class Help extends Command {
 	constructor() {

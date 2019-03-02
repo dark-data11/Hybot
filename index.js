@@ -4,20 +4,24 @@ const MongoDB = require('mongodb');
 const fs = require('fs');
 const Promise = require('bluebird');
 const tackle = require('./lib/tackle');
-const config = require('./config.json');
+const config = require('./env');
 const bot = new Eris(config.token);
 const loggr = new CatLoggr();
+const path = require('path');
 
 const CANCEL_EMOJI = '❌';
 
 require('eris-additions')(Eris); // as the name implies, it adds things to eris
+
+const DiscordHTTPError = require('eris/lib/errors/DiscordHTTPError');
+const DiscordRESTError = require('eris/lib/errors/DiscordRESTError');
 
 const commands = {};
 const hooks = {};
 
 global.Promise = Promise;
 
-Promise.promisifyAll(fs);
+// Promise.promisifyAll(fs);
 Promise.promisifyAll(require('child_process'));
 Promise.promisifyAll(MongoDB);
 
@@ -28,9 +32,25 @@ let conn;
 
 bot.on('ready', async () => {
 	console.info('Hello world!');
-	await bot.editStatus('online', {
-		name: 'h!help - https://hytalebot.net'
-	});
+
+	const presenceSentinels = [
+		() => `${config.prefix}help | hytalebot.net`,
+		() => `on ${bot.guilds.size} servers`,
+		() => `${config.prefix}support for support`
+	];
+
+	let index = -1;
+
+	async function setPresence() {
+		console.log('Setting presence...');
+		index++;
+		if (index >= presenceSentinels.length) index = 0;
+		await bot.editStatus('online', {
+			name: presenceSentinels[index]()
+		});
+	}
+	setInterval(async () => await setPresence(), 30 * 1000);
+	await setPresence();
 });
 
 (async () => {
@@ -52,10 +72,12 @@ bot.on('ready', async () => {
 
 	console.init('Loading commands...');
 
-	const cmds = (await fs.readdirAsync('./commands')).filter(
-		file =>
-			!file.startsWith('#') && !file.startsWith('.#') && file.endsWith('.js')
-	);
+	const cmds = fs
+		.readdirSync(path.join(__dirname, './commands'))
+		.filter(
+			file =>
+				!file.startsWith('#') && !file.startsWith('.#') && file.endsWith('.js')
+		);
 	const hookContext = {bot, db, client: bot};
 
 	async function unload(name) {
@@ -164,16 +186,17 @@ bot.on('ready', async () => {
 		shutdown();
 	});
 
-	fs.watch('./commands', {recursive: true}, async (type, file) => {
-		if (
-			!file.startsWith('#') &&
-			!file.startsWith('.#') &&
-			file.endsWith('.js')
-		) {
-			console.verbose(`Detected change of type ${type}! Reloading ${file}!`);
-			await load(file);
-		}
-	});
+	if (!process.pkg)
+		fs.watch('./commands', {recursive: true}, async (type, file) => {
+			if (
+				!file.startsWith('#') &&
+				!file.startsWith('.#') &&
+				file.endsWith('.js')
+			) {
+				console.verbose(`Detected change of type ${type}! Reloading ${file}!`);
+				await load(file);
+			}
+		});
 
 	console.init('OK');
 
@@ -599,7 +622,14 @@ async function getGuildData(id) {
 process.on('unhandledRejection', async function(err) {
 	console.error(err);
 	await logError(err, '000000', null, null, null, true);
-	process.exit(1);
+	if (
+		!(err instanceof DiscordHTTPError) &&
+		!(err instanceof DiscordRESTError)
+	) {
+		process.exit(1);
+	} else {
+		console.log('Not crashing, not a fatal error');
+	}
 });
 
 async function logError(err, code, user, command, guild, fatal) {
