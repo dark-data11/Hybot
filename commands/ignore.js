@@ -48,54 +48,48 @@ module.exports = class Ignore extends Command {
 		// this may seem inefficient but newData also contains the old data.
 
 		if (newData.users.length > 0) {
-			ignoredString += '**Users:**\n```patch\n';
+			ignoredString += '**Users:**\n\n';
 
 			let diff = newData.users.diff(guildInfo.ignored.users);
 
 			for (let user of newData.users) {
 				ignoredString += diff.added.includes(user)
-					? '+ ' + user
+					? '+ <@' + user + '>'
 					: diff.removed.includes(user)
-					? '- ' + user
+					? '- <@' + user + '>'
 					: user;
 				ignoredString += '\n';
 			}
-
-			ignoredString += '```\n';
 		}
 
 		if (newData.roles.length > 0) {
-			ignoredString += '**Roles:**\n```patch\n';
+			ignoredString += '**Roles:**\n\n';
 
 			let diff = newData.roles.diff(guildInfo.ignored.roles);
 
 			for (let role of newData.roles) {
 				ignoredString += diff.added.includes(role)
-					? '+ ' + role
+					? '+ <@&' + role + '>'
 					: diff.removed.includes(role)
-					? '- ' + role
+					? '- <@&' + role + '>'
 					: role;
 				ignoredString += '\n';
 			}
-
-			ignoredString += '```\n';
 		}
 
 		if (newData.channels.length > 0) {
-			ignoredString += '**Channels:**\n```patch\n';
+			ignoredString += '**Channels:**\n\n';
 
 			let diff = newData.channels.diff(guildInfo.ignored.channels);
 
 			for (let channel of newData.channels) {
 				ignoredString += diff.added.includes(channel)
-					? '+ ' + channel
+					? '+ <#' + channel + '>'
 					: diff.removed.includes(channel)
-					? '- ' + channel
+					? '- <#' + channel + '>'
 					: channel;
 				ignoredString += '\n';
 			}
-
-			ignoredString += '```';
 		}
 
 		console.log(newData);
