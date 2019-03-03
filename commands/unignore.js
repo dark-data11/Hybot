@@ -22,6 +22,7 @@ module.exports = class Unignore extends Command {
 				'Please provide any number of roles, users, or channels.'
 			);
 
+		let oldData = JSON.parse(JSON.stringify(guildInfo.ignored));
 		let newData = JSON.parse(JSON.stringify(guildInfo.ignored)); // have to do this to prevent guildInfo from getting updated
 
 		for (let userMention of msg.mentions) {
@@ -50,46 +51,58 @@ module.exports = class Unignore extends Command {
 
 		// this may seem inefficient but newData also contains the old data.
 
-		if (newData.users.length > 0) {
-			ignoredString += '**Users:**\n\n';
+		let combinedUsers = [...new Set([...newData.users, ...oldData.users])];
 
-			let diff = newData.users.diff(guildInfo.ignored.users);
+		if (combinedUsers.length > 0) {
+			ignoredString += '**Users:**\n';
 
-			for (let user of newData.users) {
+			let diff = newData.users.diff(oldData.users);
+
+			for (let user of combinedUsers) {
 				ignoredString += diff.added.includes(user)
-					? '+ <@' + user + '>'
+					? ':new:  <@' + user + '>'
 					: diff.removed.includes(user)
-					? '- <@' + user + '>'
+					? '~~<@' + user + '>~~'
 					: '<@' + user + '>';
 				ignoredString += '\n';
 			}
+
+			ignoredString += '\n';
 		}
 
-		if (newData.roles.length > 0) {
-			ignoredString += '**Roles:**\n\n';
+		let combinedRoles = [...new Set([...newData.roles, ...oldData.roles])];
 
-			let diff = newData.roles.diff(guildInfo.ignored.roles);
+		if (combinedRoles.length > 0) {
+			ignoredString += '**Roles:**\n';
 
-			for (let role of newData.roles) {
+			let diff = newData.roles.diff(oldData.roles);
+
+			for (let role of combinedRoles) {
 				ignoredString += diff.added.includes(role)
-					? '+ <@&' + role + '>'
+					? ':new:  <@&' + role + '>'
 					: diff.removed.includes(role)
-					? '- <@&' + role + '>'
+					? '~~<@&' + role + '>~~'
 					: '<@&' + role + '>';
 				ignoredString += '\n';
 			}
+
+			ignoredString += '\n';
 		}
 
-		if (newData.channels.length > 0) {
-			ignoredString += '**Channels:**\n\n';
+		let combinedChannels = [
+			...new Set([...newData.channels, ...oldData.channels])
+		];
 
-			let diff = newData.channels.diff(guildInfo.ignored.channels);
+		if (combinedChannels.length > 0) {
+			ignoredString += '**Channels:**\n';
 
-			for (let channel of newData.channels) {
+			let diff = newData.channels.diff(oldData.channels);
+
+			for (let channel of combinedChannels) {
 				ignoredString += diff.added.includes(channel)
-					? '+ <#' + channel + '>'
+					? ':new:  <#' + channel + '>'
 					: diff.removed.includes(channel)
-					? '- <#' + channel + '>'
+					? '~~<#' + channel + '>~~'
 					: '<#' + channel + '>';
 				ignoredString += '\n';
 			}

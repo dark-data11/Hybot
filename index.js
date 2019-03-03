@@ -307,6 +307,8 @@ bot.on('ready', async () => {
 				}
 
 				if (guildInfo.ignored.channels.includes(msg.channel.id)) ignored = true;
+
+				if (msg.author.id === msg.guild.ownerID) ignored = false;
 			}
 		}
 
