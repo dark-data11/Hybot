@@ -48,59 +48,57 @@ module.exports = class Ignore extends Command {
 
 		// this may seem inefficient but newData also contains the old data.
 
-		let combinedUsers = [...new Set([...newData.users, ...oldData.users])];
+		const combinedUsers = new Set(newData.users.concat(oldData.users));
 
-		if (combinedUsers.length > 0) {
+		if (combinedUsers.size !== 0) {
 			ignoredString += '**Users:**\n';
 
-			let diff = newData.users.diff(oldData.users);
+			const diff = newData.users.diff(oldData.users);
 
-			for (let user of combinedUsers) {
+			for (const user of combinedUsers) {
 				ignoredString += diff.added.includes(user)
 					? ':new:  <@' + user + '>'
 					: diff.removed.includes(user)
-					? '~~<@' + user + '>~~'
-					: '<@' + user + '>';
+						? '~~<@' + user + '>~~'
+						: '<@' + user + '>';
 				ignoredString += '\n';
 			}
 
 			ignoredString += '\n';
 		}
 
-		let combinedRoles = [...new Set([...newData.roles, ...oldData.roles])];
+		const combinedRoles = new Set(newData.roles.concat(oldData.roles));
 
-		if (combinedRoles.length > 0) {
+		if (combinedRoles.size !== 0) {
 			ignoredString += '**Roles:**\n';
 
-			let diff = newData.roles.diff(oldData.roles);
+			const diff = newData.roles.diff(oldData.roles);
 
-			for (let role of combinedRoles) {
+			for (const role of combinedRoles) {
 				ignoredString += diff.added.includes(role)
 					? ':new:  <@&' + role + '>'
 					: diff.removed.includes(role)
-					? '~~<@&' + role + '>~~'
-					: '<@&' + role + '>';
+						? '~~<@&' + role + '>~~'
+						: '<@&' + role + '>';
 				ignoredString += '\n';
 			}
 
 			ignoredString += '\n';
 		}
 
-		let combinedChannels = [
-			...new Set([...newData.channels, ...oldData.channels])
-		];
+		const combinedChannels = new Set(newData.channels.concat(oldData.channels));
 
-		if (combinedChannels.length > 0) {
+		if (combinedChannels.size !== 0) {
 			ignoredString += '**Channels:**\n';
 
-			let diff = newData.channels.diff(oldData.channels);
+			const diff = newData.channels.diff(oldData.channels);
 
-			for (let channel of combinedChannels) {
+			for (const channel of combinedChannels) {
 				ignoredString += diff.added.includes(channel)
 					? ':new:  <#' + channel + '>'
 					: diff.removed.includes(channel)
-					? '~~<#' + channel + '>~~'
-					: '<#' + channel + '>';
+						? '~~<#' + channel + '>~~'
+						: '<#' + channel + '>';
 				ignoredString += '\n';
 			}
 		}

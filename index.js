@@ -415,14 +415,19 @@ bot.on('ready', async () => {
 									await ctx.ask(
 										`Multiple matching users found choose one below: \`\`\`
 ${matchableUsers
-	.slice(0, 20)
-	.map((user, i) => `${i + 1}. ${user.username}#${user.discriminator}`)
-	.join('\n')}
+											.slice(0, 20)
+											.map(
+												(user, i) =>
+													`${i + 1}. ${user.username}#${user.discriminator}`
+											)
+											.join('\n')}
 ${
-	matchableUsers.length > 20
-		? `[Note: Showing results 0-20 of ${matchableUsers.length}]`
-		: ''
-}
+											matchableUsers.length > 20
+												? `[Note: Showing results 0-20 of ${
+														matchableUsers.length
+													}]`
+												: ''
+										}
 \`\`\``,
 										msg => {
 											const resulting =
@@ -656,7 +661,7 @@ async function logError(err, code, user, command, guild, fatal) {
 								name: 'Raw Command',
 								value: command
 							}
-					  ]
+						]
 					: null
 			}
 		});
