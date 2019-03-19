@@ -84,7 +84,7 @@ bot.on('ready', async () => {
 		console.info('Unloading ' + name);
 		const resolvedPath = resolve(name);
 		if (hooks[name]) {
-			for (const hookName in commands[name].hooks) {
+			for (const hookName in hooks[name]) {
 				if (hookName == 'loaded') {
 					continue;
 				} else if (hookName == 'unloaded') {
@@ -191,7 +191,8 @@ bot.on('ready', async () => {
 			if (
 				!file.startsWith('#') &&
 				!file.startsWith('.#') &&
-				file.endsWith('.js')
+				file.endsWith('.js') &&
+				type == 'change'
 			) {
 				console.verbose(`Detected change of type ${type}! Reloading ${file}!`);
 				await load(file);

@@ -63,24 +63,23 @@ module.exports = class Giveaway extends Command {
 	}
 	calculateRemaining(time) {
 		const remaining = time.getTime() - new Date().getTime();
-		return Math.round(remaining / 1000 / 60) + ' Minutes';
+		const minutes = Math.round(remaining / 1000 / 60);
+		return `${minutes} Minute${minutes == 1 ? '' : 's'}`;
 	}
 	insertGiveaway(ctx, giveaway) {
 		const giveawayData = {
 			timeoutId: tackle.setLongTimeout(async () => {
+				let message = null;
 				let giveawayValid = true;
 				try {
-					const message = await ctx.client.getMessage(
+					message = await ctx.client.getMessage(
 						giveaway.channelID,
 						giveaway.id
 					);
+
 					message.embeds[0].color = 0xf04747;
 					message.embeds[0].title += ' (ended)';
 					message.embeds[0].fields.pop();
-
-					await ctx.client.editMessage(giveaway.channelID, giveaway.id, {
-						embed: message.embeds[0]
-					});
 				} catch (err) {
 					if (err.code == Errors.UnknownMessage) {
 						// They deleted the message, no giveaway for them
@@ -92,11 +91,42 @@ module.exports = class Giveaway extends Command {
 						console.error(err);
 					}
 				}
+
 				if (giveawayValid) {
 					try {
-						await this.pickWinners(ctx, giveaway);
+						const {entrySet} = await this.pickWinners(ctx, giveaway);
+						if (message !== null) {
+							message.embeds[0].fields.push({
+								name: 'Winners',
+								value: Array.from(entrySet)
+									.map(userID => `<@${userID}>`)
+									.join('\n'),
+								inline: false
+							});
+						}
 					} catch (err) {
 						console.error(err);
+					}
+				}
+				if (message !== null) {
+					try {
+						await ctx.client.editMessage(giveaway.channelID, giveaway.id, {
+							embed: message.embeds[0]
+						});
+					} catch (err) {
+						if (err.code == Errors.UnknownMessage) {
+							// Oh well
+							console.warn(
+								"Giveaway message was deleted while winners were being picked so we couldn't edit it"
+							);
+						} else if (err.code == Errors.MissingAccess) {
+							console.warn(
+								'We lost access to giveaway channel while winners were being picked'
+							);
+						} else {
+							// We're going to continue, otherwise we loop on this
+							console.error(err);
+						}
 					}
 				}
 
@@ -161,54 +191,53 @@ module.exports = class Giveaway extends Command {
 				$sample: {size: Number(giveaway.winnerCount)}
 			}
 		]);
-		const entryArray = [];
+		const entrySet = new Set();
+		const entryPromises = new Set();
 		for await (const entry of winningEntries) {
-			entryArray.push(entry);
-			console.log('Found a winner for giveaway...', giveaway, entry);
-			try {
-				const channel = await client.getDMChannel(entry.userID);
-				await tackle.say(
-					ctx,
-					channel.id,
-					`Congratulations! You won the giveaway for "${giveaway.name}"!
-${giveaway.prizeMessage}`
-				);
-			} catch (err) {
-				console.warn(err);
-				try {
-					// They've blocked us or disabled DMs presumably... uhhh ?
-					await tackle.say(
-						ctx,
-						await client.getDMChannel(giveaway.authorID).id,
-						`An error occurred while sending <@${entry.userID}> their winnings`
-					);
-				} catch (err) {
-					// Yikes.
-					try {
-						await tackle.say(
-							ctx,
-							giveaway.channelID,
-							`Sorry, an error occurred while sending <@${
-								entry.userID
-							}> their winnings`
-						);
-					} catch (err) {
-						console.error(err);
-					}
-				}
-			}
+			entrySet.add(entry.userID);
 
-			try {
-				await tackle.say(
-					ctx,
-					giveaway.channelID,
-					`Congratulations! The following users won the ${giveaway.name}!
-${entryArray.map(entry => `<@${entry.userID}>`).join('\n')}`
-				);
-			} catch (err) {
-				console.error(err);
-			}
+			console.log('Found a winner for giveaway...', giveaway, entry);
+			// Not awaiting so we can continue iterating
+			entryPromises.add(
+				client
+					.getDMChannel(entry.userID)
+					.then(channel =>
+						tackle.say(
+							ctx,
+							channel.id,
+							`Congratulations! You won the giveaway for "${giveaway.name}"!
+${giveaway.prizeMessage}`
+						)
+					)
+					.catch(async err => {
+						console.warn(err);
+						try {
+							// They've blocked us or disabled DMs presumably... uhhh ?
+							await tackle.say(
+								ctx,
+								await client.getDMChannel(giveaway.authorID).id,
+								`An error occurred while sending <@${
+									entry.userID
+								}> their winnings`
+							);
+						} catch (err) {
+							// Yikes.
+							try {
+								await tackle.say(
+									ctx,
+									giveaway.channelID,
+									`Sorry, an error occurred while sending <@${
+										entry.userID
+									}> their winnings`
+								);
+							} catch (err) {
+								console.error(err);
+							}
+						}
+					})
+			);
 		}
+		return {entrySet, finishedSending: Promise.all(entryPromises.values())};
 	}
 	async execute(ctx) {
 		const title = await ctx.ask(
