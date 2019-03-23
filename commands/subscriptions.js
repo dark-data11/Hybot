@@ -36,16 +36,25 @@ module.exports = class Subscriptions extends Command {
 
 		const messagePromises = new Set();
 		for await (const subscriber of subscriptionsCursor) {
+			console.log('Saying...', subscriber);
 			messagePromises.add(
-				tackle.say(ctx, subscriber.channelID, {
-					embed: {
-						title: 'New Post',
-						description: tackle.formatString(subscriber.message, post),
-						thumbnail: {
-							url: post.thumbnail
+				tackle.say(
+					ctx,
+					subscriber.channelID,
+					{
+						embed: {
+							title: 'New Post',
+							description: tackle.formatString(subscriber.message, post),
+							thumbnail: {
+								url: post.thumbnail
+							}
 						}
+					},
+					undefined,
+					{
+						shouldMention: subscriber.shouldMention
 					}
-				})
+				)
 			);
 		}
 		await Promise.all(messagePromises);
@@ -186,7 +195,8 @@ ${formattedSubscriptions.join('\n')}`,
 					message: messageFormat,
 					channelID,
 					serviceName,
-					guildID: ctx.msg.guild.id
+					guildID: ctx.msg.guild.id,
+					shouldMention: tackle.shouldMention(ctx.msg.member)
 				});
 
 				await ctx.say('Done! New posts should show in that channel!');

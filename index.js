@@ -5,7 +5,10 @@ const fs = require('fs');
 const Promise = require('bluebird');
 const tackle = require('./lib/tackle');
 const config = require('./env');
-const bot = new Eris(config.token);
+const bot = new Eris(config.token, {
+	// How many warning labels do we need here :blobsweats:
+	disableEveryone: false
+});
 const loggr = new CatLoggr();
 const path = require('path');
 
@@ -467,8 +470,8 @@ ${
 					loggr,
 					guildInfo,
 					guild: msg.guild,
-					say(content, args) {
-						return tackle.say(ctx, msg.channel.id, content, args);
+					say(content, args, options) {
+						return tackle.say(ctx, msg.channel.id, content, args, options);
 					},
 					ask(content, filter, wholeMessage) {
 						return new Promise(async (realResolve, realReject) => {
