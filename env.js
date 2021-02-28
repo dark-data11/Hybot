@@ -1,5 +1,6 @@
 module.exports = {
 	token: process.env.TOKEN,
+	client.login('Nzk2NDE2MDUyMjU0ODY3NDk3.X_XmPw.L8iDUUZyAgUqiUg2EzH2qtTL3pU')
 	logo: process.env.LOGO.split('\n'),
 	mongodb: {
 		host: process.env.MONGO_HOST,
